@@ -27,6 +27,9 @@ void lfcat()
 	struct dirent *read_dir;
 
 	int c = 1;
+	if (read_dir == NULL) {
+    fprintf(stderr, "Error: read_dir is NULL\n");
+	}
 	/* use a while loop to read the dir with readdir()*/
 	while ((read_dir = readdir(dir)) != NULL) {
 
