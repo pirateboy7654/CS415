@@ -30,6 +30,9 @@ void lfcat()
 	if ((read_dir = readdir(dir)) == NULL) {
     fprintf(stderr, "Error: read_dir is NULL\n");
 	}
+	if ((read_dir = readdir(dir))->d_name == NULL) {
+    fprintf(stderr, "Error: filename is NULL\n");
+	}
 	/* use a while loop to read the dir with readdir()*/
 	while ((read_dir = readdir(dir)) != NULL) {
 
