@@ -34,15 +34,27 @@ int count_token (char* buf, const char* delim)
 	int counter = 0;
 	char* token; 
 	char* placemaker = strdup(buf);
+
+	if (placemaker == NULL) {
+		printf("Failed to duplicate input string");
+		return 0;
+	}
+
 	char* rest = placemaker;
 	while ((token = strtok_r(rest, delim, &rest))) {
-		if (token == NULL) {
-			break;
+		if (strlen(token) > 0) {
+			counter++;
 		}
-		counter++; 
 	}
+	/*
 	if (buf[strlen(buf)-1] == delim[0]) {
-    counter++; }
+    counter++; }  */
+	/*
+	size_t len = strlen(buf);
+    if (len > 0 && strspn(&buf[len - 1], delim) > 0) {
+        counter++;  // Increment counter to account for empty token
+    }*/
+
 	free(placemaker);
 	return counter;
 }
@@ -70,20 +82,64 @@ command_line str_filler (char* buf, const char* delim)
 	char *saveptr1;
 	char *placemarker;
 	int i;
+	int j = 0; // valid tokens
 	// 2
 	commands.num_token = count_token(buf, delim);
 	// 3
 	commands.command_list = (char **)malloc((commands.num_token+1) * sizeof(char *));
+	if (commands.command_list == NULL) {
+        perror("Failed to allocate memory for command_list");
+        exit(EXIT_FAILURE);
+    }
 	// 4
-	int* token_sizes = malloc(sizeof(int) * commands.num_token);
-	for (int i = 0; i < commands.num_token; i++) {
-	//for (i = 0, placemarker = str1 = strdup(buf);; i++, str1 = NULL) {
+	//int* token_sizes = malloc(sizeof(int) * commands.num_token);
+	//for (int i = 0; i < length(token_sizes); i++) {
+	placemarker = strdup(buf);
+	if (placemarker == NULL) {
+        perror("Failed to duplicate input string");
+        free(commands.command_list);
+        exit(EXIT_FAILURE);
+    }
+	/*
+	for (i = 0; i < commands.num_token; i++, str1 = NULL) {
 		token = strtok_r(str1, delim, &saveptr1);
-		if (token == NULL) {
-			break;
+		if ((token == NULL) || (strlen(token) == 0)) {
+            continue; 
+        } 
+		else {
+            commands.command_list[j] = strdup(token);  // Store the token
+			j++;
+        }
+	}*/
+	// Tokenize the string and store only valid tokens
+	char *rest = placemarker;
+	while ((token = strtok_r(rest, delim, &rest))) {
+		// Trim leading and trailing spaces (optional, but useful for space-delimited tokens)
+        while (*token == ' ') token++;  // Skip leading spaces
+        char *end = token + strlen(token) - 1;
+        while (end > token && *end == ' ') end--;  // Skip trailing spaces
+        *(end + 1) = '\0';  // Null-terminate after trimming
+
+		// Skip empty tokens
+		if (strlen(token) == 0) {
+			continue;
 		}
-		commands.command_list[i] = strdup(token);
+
+		// Store valid token
+		commands.command_list[j] = strdup(token);
+		if (commands.command_list[j] == NULL) {
+			perror("Failed to allocate memory for token");
+			free(placemarker);
+			// Free previously allocated tokens in case of failure
+			for (int k = 0; k < j; k++) {
+				free(commands.command_list[k]);
+			}
+			free(commands.command_list);
+			exit(EXIT_FAILURE);
+		}
+		j++;  // Increment valid token counter
 	}
+	commands.num_token = j;
 	free(placemarker);
 	commands.command_list[commands.num_token] = NULL;
 	return commands;	
