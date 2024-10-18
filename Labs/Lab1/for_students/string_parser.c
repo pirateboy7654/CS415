@@ -76,7 +76,7 @@ command_line str_filler (char* buf, const char* delim)
 	commands.command_list = (char **)malloc((commands.num_token+1) * sizeof(char *));
 	// 4
 	int* token_sizes = malloc(sizeof(int) * commands.num_token);
-	for (int i = 0; i < length(token_sizes); i++) {
+	for (int i = 0; i < commands.num_token; i++) {
 	//for (i = 0, placemarker = str1 = strdup(buf);; i++, str1 = NULL) {
 		token = strtok_r(str1, delim, &saveptr1);
 		if (token == NULL) {
