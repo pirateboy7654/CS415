@@ -58,7 +58,26 @@ int count_token (char* buf, const char* delim)
 	free(placemaker);
 	return counter;
 }
+command_line str_filler (char* buf, const char* delim) {
+	int i;
+	char *tkn, *saveptr1, *str1, *placeholder;
+	command_line cmd; 
+	cmd.num_token = count_token(buf, delim);
 
+	cmd.command_list = (char **)malloc(sizeof(char *) * (cmd.num_token +1));
+
+	for (i = 0, placeholder = str1 = strdup(buf);; i++, str1 = NULL) {
+		tkn = strtok_r(str1, delim, &saveptr1);
+		if (tkn == NULL) 
+			break;
+		cmd.command_list[i] = strdup(tkn);
+	}
+
+	free(placeholder);
+	cmd.command_list[cmd.num_token] = NULL;
+	return cmd;
+}
+/*
 command_line str_filler (char* buf, const char* delim)
 {
 	//TODO：
@@ -72,7 +91,7 @@ command_line str_filler (char* buf, const char* delim)
     *   #5. malloc each index of the array with the length of tokens,
 	*			fill command_list array with tokens, and fill last spot with NULL.
 	*	#6. return the variable.
-	*/
+	*/ /*
 
 	// 1
 	//command_line *commands = malloc(sizeof(command_line));
@@ -110,16 +129,10 @@ command_line str_filler (char* buf, const char* delim)
             commands.command_list[j] = strdup(token);  // Store the token
 			j++;
         }
-	}*/
+	}*/ /*
 	// Tokenize the string and store only valid tokens
 	char *rest = placemarker;
 	while ((token = strtok_r(rest, delim, &rest))) {
-		// Trim leading and trailing spaces (optional, but useful for space-delimited tokens)
-        while (*token == ' ') token++;  // Skip leading spaces
-        char *end = token + strlen(token) - 1;
-        while (end > token && *end == ' ') end--;  // Skip trailing spaces
-        *(end + 1) = '\0';  // Null-terminate after trimming
-
 		// Skip empty tokens
 		if (strlen(token) == 0) {
 			continue;
@@ -143,7 +156,7 @@ command_line str_filler (char* buf, const char* delim)
 	free(placemarker);
 	commands.command_list[commands.num_token] = NULL;
 	return commands;	
-}
+} */
 
 
 void free_command_line(command_line* command)

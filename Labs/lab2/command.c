@@ -27,12 +27,13 @@ void lfcat()
 	struct dirent *read_dir;
 
 	int c = 1;
+	/*
 	if ((read_dir = readdir(dir)) == NULL) {
     fprintf(stderr, "Error: read_dir is NULL\n");
 	}
 	if ((read_dir = readdir(dir))->d_name == NULL) {
     fprintf(stderr, "Error: filename is NULL\n");
-	}
+	}*/
 	/* use a while loop to read the dir with readdir()*/
 	while ((read_dir = readdir(dir)) != NULL) {
 
@@ -42,7 +43,7 @@ void lfcat()
 			{
 				continue;
 			}
-	}
+	
 		/* You can debug by printing out the filenames here */
 		fprintf(stderr, "File %d: %s\n", c, read_dir->d_name);
 		c++;
@@ -65,7 +66,7 @@ void lfcat()
 		}
 		newLine();
 			/* close the read file and free/null assign your line buffer */
-		
+	}
 	
 	/*close the directory you were reading from using closedir() */
 		closedir(dir);
