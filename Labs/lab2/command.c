@@ -18,6 +18,10 @@ void lfcat()
 	
 	char cwd[1024];
 	getcwd(cwd, sizeof(cwd));
+
+	write(STDOUT_FILENO, cwd, strlen(cwd));
+	newLine();
+	freopen("my_output.txt", "w", stdout);
 	/* Open the dir using opendir() */
 
 	DIR *dir;
@@ -52,6 +56,7 @@ void lfcat()
 			/* Open the file */
 		int file_id = open(read_dir->d_name, O_RDONLY);
 			/* Read in each line using getline() */
+		// FILE *out_f = freopen(dest_path, "w", stdout);
 		char buffer[1024];
 		size_t bytes;
 		do {
