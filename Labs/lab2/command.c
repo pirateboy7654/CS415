@@ -64,8 +64,6 @@ void lfcat()
 		fprintf(stderr, "File %d: %s\n", c, read_dir->d_name);
 		c++;
 		/* Option: use an if statement to skip any names that are not readable files (e.g. ".", "..", "main.c", "lab2.exe", "output.txt" */
-		char full_path[1024];
-        snprintf(full_path, sizeof(full_path), "%s/%s", cwd, read_dir->d_name);
 			/* Open the file */
 		int file_id = open(read_dir->d_name, O_RDONLY);
 		if (file_id == -1) {
