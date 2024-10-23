@@ -66,10 +66,11 @@ void lfcat()
 		/* Option: use an if statement to skip any names that are not readable files (e.g. ".", "..", "main.c", "lab2.exe", "output.txt" */
 			/* Open the file */
 		int file_id = open(read_dir->d_name, O_RDONLY);
+		/*
 		if (file_id == -1) {
     		perror("open");
     		continue;
-		}
+		}*/
 			/* Read in each line using getline() */
 		// FILE *out_f = freopen(dest_path, "w", stdout);
 		char buffer[1024];
