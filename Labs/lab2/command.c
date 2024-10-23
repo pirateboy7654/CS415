@@ -21,58 +21,80 @@ void lfcat()
 
 	write(STDOUT_FILENO, cwd, strlen(cwd));
 	newLine();
-	freopen("my_output.txt", "w", stdout);
+
+	FILE *output_file = freopen("my_output.txt", "w", stdout);
+	if (output_file == NULL) {
+        perror("freopen");
+        return;
+    }
 	/* Open the dir using opendir() */
 
+	printf("Current working directory: %s\n", cwd);
+	/*
+	if (strlen(cwd) + strlen("/files") < sizeof(cwd)) {
+        strcat(cwd, "/files");
+    } */
+	printf("Current working directory: %s\n", cwd);
+	//freopen("my_output.txt", "w", stdout);
 	DIR *dir;
 
 	dir = opendir(cwd);
-
+	
 	struct dirent *read_dir;
+	//printf("%s", readdir(dir)->d_name);
 
 	int c = 1;
-	/*
-	if ((read_dir = readdir(dir)) == NULL) {
-    fprintf(stderr, "Error: read_dir is NULL\n");
+	if (dir == NULL) {
+		perror("dir");
 	}
-	if ((read_dir = readdir(dir))->d_name == NULL) {
-    fprintf(stderr, "Error: filename is NULL\n");
-	}*/
 	/* use a while loop to read the dir with readdir()*/
 	while ((read_dir = readdir(dir)) != NULL) {
-
+	//read_dir = readdir(dir);
+	//for (int i = 0; i < 3; i++, read_dir = readdir(dir)) {
+		
+		//printf("dir name: %s", read_dir->d_name);
 		if (strcmp(read_dir->d_name, ".") == 0 ||
 			strcmp(read_dir->d_name, "..") == 0 || 
 			strcmp(read_dir->d_name, "lab2") == 0) 
 			{
 				continue;
 			}
-	
+
 		/* You can debug by printing out the filenames here */
 		fprintf(stderr, "File %d: %s\n", c, read_dir->d_name);
 		c++;
 		/* Option: use an if statement to skip any names that are not readable files (e.g. ".", "..", "main.c", "lab2.exe", "output.txt" */
-			
+		char full_path[1024];
+        snprintf(full_path, sizeof(full_path), "%s/%s", cwd, read_dir->d_name);
 			/* Open the file */
 		int file_id = open(read_dir->d_name, O_RDONLY);
+		if (file_id == -1) {
+    		perror("open");
+    		continue;
+		}
 			/* Read in each line using getline() */
 		// FILE *out_f = freopen(dest_path, "w", stdout);
 		char buffer[1024];
 		size_t bytes;
 		do {
 			bytes = read(file_id, buffer, sizeof(buffer)); 
-			write(STDOUT_FILENO, buffer, bytes);
+			fwrite(buffer, 1, bytes, stdout);
 		}	while (bytes > 0);
 				/* Write the line to stdout */
 		close(file_id);
+		// freopen("/dev/tty", "a", stdout);
 			/* write 80 "-" characters to stdout */
+			
 		for (int i = 0; i < 80; ++i) {
-			write(STDOUT_FILENO, "-", strlen("-"));
+			write(STDOUT_FILENO, "-", 1);
 		}
 		newLine();
 			/* close the read file and free/null assign your line buffer */
 	}
-	
+		
 	/*close the directory you were reading from using closedir() */
-		closedir(dir);
+	closedir(dir);
+	fclose(stdout);
+		//freopen("/dev/tty", "w", stdout);
+	printf("lfcat is done");
 }

@@ -1,5 +1,5 @@
 CFLAGS=-g -W -Wall
-OBJECTS=command.o main.o
+OBJECTS=command.o main.o my_output.txt
 
 lfcat: main.o command.o
 	gcc -g -o $@ $^
