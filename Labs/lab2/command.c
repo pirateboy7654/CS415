@@ -30,10 +30,10 @@ void lfcat()
 	/* Open the dir using opendir() */
 
 	printf("Current working directory: %s\n", cwd);
-	/*
+	
 	if (strlen(cwd) + strlen("/files") < sizeof(cwd)) {
         strcat(cwd, "/files");
-    } */
+    } 
 	printf("Current working directory: %s\n", cwd);
 	//freopen("my_output.txt", "w", stdout);
 	DIR *dir;
