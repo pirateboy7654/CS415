@@ -34,11 +34,12 @@ void lfcat()
 	if (strlen(cwd) + strlen("/files") < sizeof(cwd)) {
         strcat(cwd, "/files");
     } 
-	printf("Current working directory: %s\n", cwd);
+	
 	//freopen("my_output.txt", "w", stdout);
 	DIR *dir;
 
 	dir = opendir(cwd);
+
 	
 	struct dirent *read_dir;
 	//printf("%s", readdir(dir)->d_name);
@@ -47,6 +48,11 @@ void lfcat()
 	if (dir == NULL) {
 		perror("dir");
 	}
+	/*
+	read_dir = readdir(dir);
+	printf("Current working directory: %s\n", cwd);
+	return;
+	*/
 	/* use a while loop to read the dir with readdir()*/
 	while ((read_dir = readdir(dir)) != NULL) {
 	//read_dir = readdir(dir);
@@ -60,12 +66,24 @@ void lfcat()
 				continue;
 			}
 
+ 
 		/* You can debug by printing out the filenames here */
 		fprintf(stderr, "File %d: %s\n", c, read_dir->d_name);
 		c++;
 		/* Option: use an if statement to skip any names that are not readable files (e.g. ".", "..", "main.c", "lab2.exe", "output.txt" */
 			/* Open the file */
-		int file_id = open(read_dir->d_name, O_RDONLY);
+		/* Build full path for each file */
+		char full_path[1024];  // Buffer for the full path
+		snprintf(full_path, sizeof(full_path), "%s/%s", cwd, read_dir->d_name);
+		printf("full path %s\n", full_path);
+		/* Open the file using the full path */
+		int file_id = open(full_path, O_RDONLY);
+		if (file_id == -1) {
+			perror("open");
+			continue;  // Skip this file if it cannot be opened
+		}
+
+		//int file_id = open(read_dir->d_name, O_RDONLY);
 		/*
 		if (file_id == -1) {
     		perror("open");
@@ -94,6 +112,6 @@ void lfcat()
 	/*close the directory you were reading from using closedir() */
 	closedir(dir);
 	fclose(stdout);
-		//freopen("/dev/tty", "w", stdout);
-	printf("lfcat is done");
+	freopen("/dev/tty", "w", stdout);
+	printf("lfcat is done\n");
 }
