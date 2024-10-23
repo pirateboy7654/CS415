@@ -73,7 +73,7 @@ void lfcat()
 		/* Option: use an if statement to skip any names that are not readable files (e.g. ".", "..", "main.c", "lab2.exe", "output.txt" */
 			/* Open the file */
 		/* Build full path for each file */
-		char full_path[1024];  // Buffer for the full path
+		char full_path[1280];  // Buffer for the full path
 		snprintf(full_path, sizeof(full_path), "%s/%s", cwd, read_dir->d_name);
 		printf("full path %s\n", full_path);
 		/* Open the file using the full path */
