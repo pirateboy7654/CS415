@@ -1,0 +1,36 @@
+make dir: File exists
+sktop/Classes/CS 415/CS415_git/Project 1
+/Users/jamiewhiting/Desktop/Classes/CS 415/CS415_git/Project 1/test
+/Users/jamiewhiting/Desktop/Classes/CS 415/CS415_git/Project 1/test
+input.txt
+pwd ; mkdir test ; cd test
+sfjlksagjlks;ls; pwd;
+cd .. ; cd test ; pwd
+cp ../input.txt . ; ls ; cat input.txt
+mv input.txt del.txt ; pwd ; ls
+rm del.txt ; ls
+cd .. ; pwd
+ls/Users/jamiewhiting/Desktop/Classes/CS 415/CS415_git/Project 1/test
+del.txt
+/Users/jamiewhiting/Desktop/Classes/CS 415/CS415_git/Project 1
+main.o
+example-output.txt
+pseudo-shell-arm-based
+pseudo-shell-intel-based
+test
+pseudo-shell
+Makefile
+string_parser.h
+command.c
+string_parser.o
+input.txt
+main.c
+Report_Collection_Template.docx
+test_script.sh
+command.h
+command.o
+string_parser.c
+output.txt
+project-1-description-fall-2024 (1) copy 2.pdf
+Error! Unrecognized command: sfjlksagjlks
+cat command
