@@ -230,7 +230,6 @@ void file_mode(const char *filename) {
         }
 
         // parse and execute the command
-
         // copied from lab 1
         
 
@@ -247,13 +246,6 @@ void file_mode(const char *filename) {
 			//tokenize large buffer
 			//smaller token is seperated by " "(space bar)
 			small_token_buffer = str_filler (large_token_buffer.command_list[i], " ");
-
-			//iterate through each smaller token to print
-            //printf("\t\tToken 1: %s, # of tokens: %d", small_token_buffer.command_list[0], small_token_buffer.num_token);
-			/*for (int j = 0; small_token_buffer.command_list[j] != NULL; j++)
-			{
-				printf ("\t\tToken %d: %s\n", j + 1, small_token_buffer.command_list[j]);
-			}*/
 
             // identify the command and error check, then preform command
             if (small_token_buffer.command_list[0] != NULL) {

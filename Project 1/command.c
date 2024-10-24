@@ -8,8 +8,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-
-
 /*for the ls command*/
 void listDir() {
     //printf("ls command\n");
