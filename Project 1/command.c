@@ -26,7 +26,7 @@ void listDir() {
         // print file names
         if (dir->d_name[0] != '.') {  
             write(STDOUT_FILENO, dir->d_name, strlen(dir->d_name));
-            write(STDOUT_FILENO, "\t", 1); // is newline needed here? 
+            write(STDOUT_FILENO, "\t", 1); // is tab or newline needed here? 
         }
     }
 
