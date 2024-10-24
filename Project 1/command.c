@@ -25,10 +25,10 @@ void listDir() {
 
     // read directory entries
     while ((dir = readdir(d)) != NULL) {
-        // print file name
-        if (dir->d_name[0] != '.') {  // ignores hidden files
+        // print file names
+        if (dir->d_name[0] != '.') {  
             write(STDOUT_FILENO, dir->d_name, strlen(dir->d_name));
-            write(STDOUT_FILENO, "\n", 1);
+            write(STDOUT_FILENO, "\t", 1); // is newline needed here? 
         }
     }
 
@@ -46,7 +46,7 @@ void showCurrentDir() {
     // allocate memory for the buffer
     buffer = (char *)malloc(size);
     if (buffer == NULL) {
-        perror("Unable to allocate buffer");
+        perror("Unable to allocate buffer"); // error if cant allocate buffer
         return;
     }
 
@@ -69,7 +69,7 @@ void makeDir(char *dirName) {
     //printf("mkdir command\n");
     // creates a dir with r/w/x perms
     if (mkdir(dirName, 0755) == -1) {
-        perror("make dir");
+        perror("make dir"); // error check
     }
 }
 /*for the cd command*/
@@ -77,7 +77,7 @@ void changeDir(char *dirName) {
     //printf("cd command\n");
     // changes dir to dirname
     if (chdir(dirName) == -1) {
-        perror("change dir");
+        perror("change dir"); // error check 
     }
 }
 
@@ -87,8 +87,6 @@ void copyFile(char *sourcePath, char *destinationPath) {
     int src, dst;
     char buffer[1024];
     ssize_t bytes_read;
-
-    
 
     // open src file for reading
     src = open(sourcePath, O_RDONLY);
@@ -108,13 +106,12 @@ void copyFile(char *sourcePath, char *destinationPath) {
     else {
         strcpy(full_dest_path, destinationPath); // copy the destination path
     }
-    
 
     // open dst file for writing (create if doesn't exist)
     dst = open(full_dest_path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
     if (dst == -1) {
         perror("open (destination)"); // error if cant open dst file
-        close(src);
+        close(src); // close file if error
         return;
     }
 
@@ -122,7 +119,7 @@ void copyFile(char *sourcePath, char *destinationPath) {
     while ((bytes_read = read(src, buffer, sizeof(buffer))) > 0) {
         if (write(dst, buffer, bytes_read) != bytes_read) {
             perror("write"); // error if cant copy
-            close(src);
+            close(src); // close files if error
             close(dst);
             return;
         }
@@ -165,7 +162,7 @@ void displayFile(char *filename) {
         return;
     }
 
-    // Read and display the file's contents
+    // read and display the file contents
     while ((bytes_read = read(file_des, buffer, sizeof(buffer))) > 0) {
         if (write(STDOUT_FILENO, buffer, bytes_read) != bytes_read) {
             perror("write");
@@ -174,6 +171,6 @@ void displayFile(char *filename) {
         }
     }
 
-    // Close the file
+    // close the file
     close(file_des);
 }

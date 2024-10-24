@@ -26,7 +26,7 @@ b. Interactive mode:
 #include "command.h"
 #include "string_parser.h"
 
-//function declarations
+// function declarations
 void interactive_mode();
 void file_mode(const char *filename);
 
@@ -41,7 +41,7 @@ int main(int argc, char const *argv[])
     else if ((argc == 3) && (strcmp(argv[1], "-f") == 0)) {
         file_mode(argv[2]);
     }
-    //error check for improper arguments
+    // error check for improper arguments
     else {
         fprintf(stderr, "Error Improper Usage: \n"
                 "File Mode: pseudo-shell -f <filename> \n"
@@ -55,7 +55,7 @@ void interactive_mode() {
     char *line = NULL;
     size_t len = 0;
 
-    printf(">>> ");  // Prompt for user input
+    printf(">>> ");  // prompt for user input
 
     while (getline(&line, &len, stdin) != -1) {
         // strip newline character
@@ -67,13 +67,8 @@ void interactive_mode() {
             break;
         }
 
-        // Parse and execute the command
-        // use strtok() to parse the line here and call the relevant function
-        // For example:
-        // parseAndExecute(line);
-
+        // parse and execute the command
         // copied from lab 1
-        
 
         command_line large_token_buffer;
         command_line small_token_buffer;
@@ -88,13 +83,6 @@ void interactive_mode() {
 			//tokenize large buffer
 			//smaller token is seperated by " "(space bar)
 			small_token_buffer = str_filler (large_token_buffer.command_list[i], " ");
-
-			//iterate through each smaller token to print
-            //printf("\t\tToken 1: %s, # of tokens: %d", small_token_buffer.command_list[0], small_token_buffer.num_token);
-			/*for (int j = 0; small_token_buffer.command_list[j] != NULL; j++)
-			{
-				printf ("\t\tToken %d: %s\n", j + 1, small_token_buffer.command_list[j]);
-			}*/
 
             // identify the command and error check, then preform command
             if (small_token_buffer.command_list[0] != NULL) {
@@ -203,7 +191,6 @@ void interactive_mode() {
 		//free smaller tokens and reset variable
 		free_command_line (&large_token_buffer);
 		memset (&large_token_buffer, 0, 0);
-        // finish copy
         printf(">>> ");  // prompt again after command execution
     }
 
@@ -211,7 +198,7 @@ void interactive_mode() {
     return;
 }
 
-// mostly from lab 2 lfcat
+// some from lab 2 lfcat and lab 1 string parser
 void file_mode(const char *filename) {
     char *line = NULL;
     size_t len = 0;
@@ -242,10 +229,7 @@ void file_mode(const char *filename) {
             break;
         }
 
-        // Parse and execute the command
-        // use strtok() to parse the line here and call the relevant function
-        // For example:
-        // parseAndExecute(line);
+        // parse and execute the command
 
         // copied from lab 1
         
