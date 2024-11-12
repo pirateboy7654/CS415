@@ -1,4 +1,5 @@
-echo "Starting process 1"
+echo "Process 1 running"
+sleep 3
 echo "Process 2 running"
 sleep 2
-echo "Process 3 complete"
+echo "Process 3 running"
