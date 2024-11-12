@@ -68,7 +68,8 @@ void execute_commands(const char *filename) {
             perror("waitpid failed");
         }
     }
-
+    // exit after all child processes are completed
+    exit(0);
 }
 
 
