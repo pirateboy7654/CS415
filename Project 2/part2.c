@@ -62,6 +62,8 @@ void execute_commands(const char *filename) {
             int sig; 
             sigwait(&sigset, &sig); // wait for SIGUSR1
 
+            // debug
+            printf("Child %d received SIGUSR1 and is now executing command\n", getpid());
             // call exec after recieving SIGUSR1
             if (execvp(arguments[0], arguments) == -1) {
                 perror("Exec failed");
@@ -77,6 +79,8 @@ void execute_commands(const char *filename) {
     // sending SIGUSR1 to each child to start exec
     for (int j = 0; j < process_count; j++)
     {
+        // debug
+        printf("Parent sending SIGUSR1 to child %d\n", pid_array[j]);
         kill(pid_array[j], SIGUSR1);
     }
 
@@ -84,12 +88,16 @@ void execute_commands(const char *filename) {
     sleep(1);
     for (int j = 0; j < process_count; j++) 
     {
+        // debug
+        printf("Parent sending SIGSTOP to child %d\n", pid_array[j]);
         kill(pid_array[j], SIGSTOP);
     }
 
     // resume each process with SIGCONT and wait for i tto finish
     for (int j = 0; j < process_count; j++)
     {
+        // debug
+        printf("Parent sending SIGCONT to child %d\n", pid_array[j]);
         kill(pid_array[j], SIGCONT);
         int status;
         if (waitpid(pid_array[j], &status, 0) == -1)
@@ -99,5 +107,6 @@ void execute_commands(const char *filename) {
     }
 
     // exit after all child processes are completed
+    printf("Exiting now \n");
     exit(0);
 }

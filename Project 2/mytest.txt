@@ -1,5 +1,4 @@
-ls -l
-echo "Hello, World!"
-sleep 10
-date
-whoami
+echo "Starting process 1"
+echo "Process 2 running"
+sleep 2
+echo "Process 3 complete"
