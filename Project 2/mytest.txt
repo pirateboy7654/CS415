@@ -1,4 +1,5 @@
 ls -l
 echo "Hello, World!"
+sleep 10
 date
 whoami
