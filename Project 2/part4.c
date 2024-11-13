@@ -207,8 +207,8 @@ long get_io_bytes_read(pid_t pid) {
     long bytes_read = 0;
     char line[256];
     while (fgets(line, sizeof(line), file)) {
-        if (strncmp(line, "bytes_read:", 11) == 0) {
-            sscanf(line, "bytes_read: %ld", &bytes_read);
+        if (strncmp(line, "read_bytes:", 11) == 0) {
+            sscanf(line, "read_bytes: %ld", &bytes_read);
             break;
         }
     }
