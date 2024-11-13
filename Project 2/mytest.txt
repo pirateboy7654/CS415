@@ -1,4 +1,4 @@
-echo "Starting Process 1 - CPU Test"
-bc <<< "scale=1000; 4*a(1)"
-echo "Starting Process 2 - I/O Test"
-dd if=/dev/urandom of=/dev/null bs=1K count=1000
+echo "Starting process 1"
+echo "Process 2 running"
+sleep 2
+echo "Process 3 complete"
