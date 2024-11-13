@@ -202,22 +202,30 @@ long get_exec_time(pid_t pid) {
 
 // Function to retrieve I/O read bytes from /proc/[pid]/io
 long get_io_bytes_read(pid_t pid) {
-    char path[40];
+    char path[1024];
     snprintf(path, sizeof(path), "/proc/%d/io", pid);
     FILE *file = fopen(path, "r");
     if (!file) {
-        perror("Could not open /proc/[pid]/io");
+        perror("Could not open /proc/[pid]/io - ensure you have the necessary permissions");
         return -1;
     }
 
     long bytes_read = 0;
     char line[256];
+    int found = 0;  // Flag to check if read_bytes was found
     while (fgets(line, sizeof(line), file)) {
         if (strncmp(line, "read_bytes:", 11) == 0) {
             sscanf(line, "read_bytes: %ld", &bytes_read);
+            found = 1;
             break;
         }
     }
     fclose(file);
+
+    if (!found) {
+        printf("Debug: read_bytes not found in /proc/%d/io\n", pid);
+    } else {
+        printf("Debug: I/O read bytes for PID %d: %ld bytes\n", pid, bytes_read);
+    }
     return bytes_read;  // Total bytes read by the process
 }
