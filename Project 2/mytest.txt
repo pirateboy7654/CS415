@@ -1,15 +1,15 @@
-# Moderate I/O with /dev/urandom (output redirected to /dev/null)
-echo "Starting Process 1 - CPU and I/O Test"
-head -c 500000 /dev/urandom > /dev/null
+# Basic CPU-intensive command
+echo "Starting Process 1 - Moderate CPU Test"
+bc <<< "scale=2000; 4*a(1)"  # Calculates pi to 2000 decimal places, using moderate CPU
 
-# Moderate CPU with bc (calculates pi to 1000 decimal places)
-echo "Starting Process 2 - CPU Test"
-bc <<< "scale=1000; 4*a(1)"
+# Basic I/O command with moderate data transfer
+echo "Starting Process 2 - Moderate I/O Test"
+dd if=/dev/zero of=/dev/null bs=1K count=500  # Reads and discards 500 KB, using moderate I/O
 
-# Light I/O with dd
-echo "Starting Process 3 - I/O Test"
-dd if=/dev/zero of=/dev/null bs=1K count=100
+# A short sleep to observe low CPU usage
+echo "Starting Process 3 - Minimal CPU and I/O"
+sleep 3  # Should generate minimal CPU usage
 
-# Minimal CPU usage with sleep
-echo "Starting Process 4 - Light CPU Test"
-sleep 2
+# Another moderate I/O command with slightly more data
+echo "Starting Process 4 - Additional Moderate I/O Test"
+dd if=/dev/urandom of=/dev/null bs=1K count=200  # Reads 200 KB of random data, moderate I/O
