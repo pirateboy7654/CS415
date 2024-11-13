@@ -71,7 +71,7 @@ void execute_commands(const char *filename) {
     sigemptyset(&sigset);
     sigaddset(&sigset, SIGUSR1);
     // Block SIGUSR1 in the parent to avoid premature handling
-    sigprocmask(SIG_BLOCK, &sigset, NULL);
+    //sigprocmask(SIG_BLOCK, &sigset, NULL);
 
     while (fgets(line, sizeof(line), file)) {
         // Remove newline character
