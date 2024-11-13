@@ -213,12 +213,22 @@ long get_io_bytes_read(pid_t pid) {
 
     long bytes_read = 0;
     char line[256];
+    int found = 0;  // Flag to check if read_bytes was found
+
     while (fgets(line, sizeof(line), file)) {
         if (strncmp(line, "read_bytes:", 11) == 0) {
             sscanf(line, "read_bytes: %ld", &bytes_read);
+            found = 1;
             break;
         }
     }
     fclose(file);
+
+    if (!found) {
+        printf("Debug: read_bytes not found in /proc/%d/io\n", pid);
+    } else {
+        printf("Debug: I/O read bytes for PID %d: %ld bytes\n", pid, bytes_read);
+    }
+    
     return bytes_read;  // Total bytes read by the process
 }
