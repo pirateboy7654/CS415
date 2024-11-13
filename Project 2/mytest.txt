@@ -1,5 +1,8 @@
-yes > /dev/null & sleep 5; kill $!
-dd if=/dev/zero of=/dev/null bs=1M count=100
-bc <<< "scale=5000; 4*a(1)"
-head -c 1000000 /dev/urandom > /dev/null
-gzip -c < /dev/urandom > /dev/null & sleep 5; kill $!
+echo "Starting Process 1 - CPU and I/O Test"
+head -c 500000 /dev/urandom > /dev/null
+echo "Starting Process 2 - CPU Test"
+bc <<< "scale=1000; 4*a(1)"
+echo "Starting Process 3 - I/O Test"
+dd if=/dev/zero of=/dev/null bs=1K count=100
+echo "Starting Process 4 - Light CPU Test"
+sleep 2
