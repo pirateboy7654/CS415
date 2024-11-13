@@ -1,11 +1,6 @@
-echo "Starting Process 1 - Moderate CPU Test"
-bc <<< "scale=2000; 4*a(1)"  # Calculates pi to 2000 decimal places, using moderate CPU
-
-echo "Starting Process 2 - Moderate I/O Test"
-dd if=/dev/zero of=/dev/null bs=1K count=500  
-
-echo "Starting Process 3 - Minimal CPU and I/O"
-sleep 3 
-
-echo "Starting Process 4 - Additional Moderate I/O Test"
-dd if=/dev/urandom of=/dev/null bs=1K count=200 
+echo "Starting Process 1 - CPU Test"
+bc <<< "scale=1000; 4*a(1)"
+echo "Starting Process 2 - I/O Test"
+dd if=/dev/urandom of=/dev/null bs=1K count=500
+echo "Starting Process 3 - Sleep Test"
+sleep 2

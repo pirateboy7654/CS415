@@ -8,7 +8,7 @@
 
 #define max_processes 100  // max processes
 int max_args = 10;      // max arguments
-int time_slice = 1; // time slice for scheduling
+int time_slice = 2; // time slice for scheduling
 int process_count = 0; 
 int current_process = 0;
 pid_t pid_array[max_processes];
@@ -71,7 +71,7 @@ void execute_commands(const char *filename) {
     sigemptyset(&sigset);
     sigaddset(&sigset, SIGUSR1);
     // Block SIGUSR1 in the parent to avoid premature handling
-    sigprocmask(SIG_BLOCK, &sigset, NULL);
+    //sigprocmask(SIG_BLOCK, &sigset, NULL);
 
     while (fgets(line, sizeof(line), file)) {
         // Remove newline character
