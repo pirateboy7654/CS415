@@ -1,6 +1,6 @@
 echo "Starting CPU Test"
 bc <<< "scale=5000; 4*a(1)" 
 echo "Starting I/O Test"
-dd if=/dev/urandom of=/dev/null bs=1M count=10  
+dd if=/dev/urandom of=/dev/null bs=1M count=50  
 echo "Starting Sleep Test"
 sleep 5
