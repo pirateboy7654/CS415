@@ -1,5 +1,5 @@
-echo "Process 1 running"
-sleep 3
-echo "Process 2 running"
-sleep 2
-echo "Process 3 running"
+yes > /dev/null & sleep 5; kill $!
+dd if=/dev/zero of=/dev/null bs=1M count=100
+bc <<< "scale=5000; 4*a(1)"
+head -c 1000000 /dev/urandom > /dev/null
+gzip -c < /dev/urandom > /dev/null & sleep 5; kill $!
