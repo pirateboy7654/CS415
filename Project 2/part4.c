@@ -8,7 +8,7 @@
 
 #define max_processes 100  // max processes
 int max_args = 10;      // max arguments
-int time_slice = 2; // time slice for scheduling
+int time_slice = 3; // time slice for scheduling
 int process_count = 0; 
 int current_process = 0;
 pid_t pid_array[max_processes];
