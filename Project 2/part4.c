@@ -185,9 +185,13 @@ long get_exec_time(pid_t pid) {
         return -1;
     }
 
-    long utime, stime;
+    long utime = 0;
+    long stime = 0;
+
+    char temp[1024];
     for (int i = 1; i <= 13; i++) {  // Skip the first 13 fields
-        fscanf(file, "%*s");
+        fscanf(file, "%s", temp);
+        printf("Debug: Field %d: %s\n", i, temp);  // debug
     }
     fscanf(file, "%ld %ld", &utime, &stime);  // Fields 14 and 15
     fclose(file);
