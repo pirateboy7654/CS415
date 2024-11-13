@@ -140,9 +140,9 @@ void scheduler(int signum) {
     printf("-------------------------------------------------------------\n");
     for (int i = 0; i < process_count; i++) {
         if (waitpid(pid_array[i], NULL, WNOHANG) == 0) {  // Check if process is still active
-            memory = get_memory_usage(pid_array[i]);
-            cpu_time = get_cpu_usage(pid_array[i]);
-            io_read = get_io_read_bytes(pid_array[i]);    
+            memory = get_mem_usage(pid_array[i]);
+            cpu_time = get_exec_time(pid_array[i]);
+            io_read = get_io_bytes_read(pid_array[i]);    
             printf("%-10d | %-12d | %-16ld | %-14ld\n", 
                 pid_array[i], memory, cpu_time, io_read);  
         }
