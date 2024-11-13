@@ -8,7 +8,7 @@
 
 #define max_processes 100  // max processes
 int max_args = 10;      // max arguments
-int time_slice = 1; // time slice for scheduling
+int time_slice = 5; // time slice for scheduling
 int process_count = 0; 
 int current_process = 0;
 pid_t pid_array[max_processes];
@@ -229,6 +229,6 @@ long get_io_bytes_read(pid_t pid) {
     } else {
         printf("Debug: I/O read bytes for PID %d: %ld bytes\n", pid, bytes_read);
     }
-    
+
     return bytes_read;  // Total bytes read by the process
 }
