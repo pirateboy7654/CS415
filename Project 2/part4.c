@@ -114,6 +114,7 @@ void execute_commands(const char *filename) {
 
 // SIGALRM handler for scheduling and displaying resource usage
 void scheduler(int signum) {
+    printf("Scheduler triggered\n");  
     // Stop the current process if it's still running
     if (waitpid(pid_array[current_process], NULL, WNOHANG) == 0) {
         printf("Stopping process %d\n", pid_array[current_process]);
