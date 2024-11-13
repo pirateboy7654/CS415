@@ -1,15 +1,11 @@
-# Basic CPU-intensive command
 echo "Starting Process 1 - Moderate CPU Test"
 bc <<< "scale=2000; 4*a(1)"  # Calculates pi to 2000 decimal places, using moderate CPU
 
-# Basic I/O command with moderate data transfer
 echo "Starting Process 2 - Moderate I/O Test"
-dd if=/dev/zero of=/dev/null bs=1K count=500  # Reads and discards 500 KB, using moderate I/O
+dd if=/dev/zero of=/dev/null bs=1K count=500  
 
-# A short sleep to observe low CPU usage
 echo "Starting Process 3 - Minimal CPU and I/O"
 sleep 3  # Should generate minimal CPU usage
 
-# Another moderate I/O command with slightly more data
 echo "Starting Process 4 - Additional Moderate I/O Test"
-dd if=/dev/urandom of=/dev/null bs=1K count=200  # Reads 200 KB of random data, moderate I/O
+dd if=/dev/urandom of=/dev/null bs=1K count=200 
