@@ -5,7 +5,7 @@ echo "Starting Process 2 - Moderate I/O Test"
 dd if=/dev/zero of=/dev/null bs=1K count=500  
 
 echo "Starting Process 3 - Minimal CPU and I/O"
-sleep 3  # Should generate minimal CPU usage
+sleep 3 
 
 echo "Starting Process 4 - Additional Moderate I/O Test"
 dd if=/dev/urandom of=/dev/null bs=1K count=200 
