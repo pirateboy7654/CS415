@@ -191,6 +191,8 @@ long get_exec_time(pid_t pid) {
     }
     fscanf(file, "%ld %ld", &utime, &stime);  // Fields 14 and 15
     fclose(file);
+    printf("Debug: CPU time for PID %d: %ld ticks\n", pid, (utime+stime));  // Add this debug line
+
     return utime + stime;  // Total CPU time in clock ticks
 }
 
