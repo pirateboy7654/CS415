@@ -136,9 +136,9 @@ void scheduler(int signum) {
     int switches;
 
     printf("\nResource Usage:\n");
-    printf("-------------------------------------------------------------\n");
-    printf("PID        | Memory (KB)   | CPU Time (ticks)   | Context Switches\n");
-    printf("-------------------------------------------------------------\n");
+    printf("---------------------------------------------------------------\n");
+    printf("\tPID | \tMemory (KB) | \tCPU Time (ticks) | \tContext Switches\n");
+    printf("---------------------------------------------------------------\n");
     for (int i = 0; i < process_count; i++) {
         if (waitpid(pid_array[i], NULL, WNOHANG) == 0) {  // Check if process is still active
             memory = get_mem_usage(pid_array[i]);
@@ -148,7 +148,7 @@ void scheduler(int signum) {
                 pid_array[i], memory, cpu_time, switches);  
         }
     }
-    printf("-------------------------------------------------------------\n");
+    printf("---------------------------------------------------------------\n");
 
     // Reset the alarm for the next time slice
     alarm(time_slice);
