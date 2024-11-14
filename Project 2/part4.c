@@ -138,7 +138,6 @@ void scheduler(int signum) {
     printf("\nResource Usage:\n");
     printf("---------------------------------------------------------------\n");
     printf("\tPID | \tMemory (KB) | \tCPU Time (ticks) | \tContext Switches\n");
-    printf("---------------------------------------------------------------\n");
     for (int i = 0; i < process_count; i++) {
         if (waitpid(pid_array[i], NULL, WNOHANG) == 0) {  // Check if process is still active
             memory = get_mem_usage(pid_array[i]);
