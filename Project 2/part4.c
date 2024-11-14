@@ -18,7 +18,7 @@ void execute_commands(const char *filename);
 void scheduler(int signum);
 int get_mem_usage(pid_t pid);
 long get_exec_time(pid_t pid);
-long get_io_bytes_read(pid_t pid);
+int get_context_switches(pid_t pid);
 
 
 
@@ -133,19 +133,19 @@ void scheduler(int signum) {
     // Display resource usage for each process
     int memory;
     long cpu_time;
-    long io_read;
+    int switches;
 
     printf("\nResource Usage:\n");
     printf("-------------------------------------------------------------\n");
-    printf("PID        | Memory (KB)   | CPU Time (ticks)   | I/O Read (bytes)\n");
+    printf("PID        | Memory (KB)   | CPU Time (ticks)   | Context Switches\n");
     printf("-------------------------------------------------------------\n");
     for (int i = 0; i < process_count; i++) {
         if (waitpid(pid_array[i], NULL, WNOHANG) == 0) {  // Check if process is still active
             memory = get_mem_usage(pid_array[i]);
             cpu_time = get_exec_time(pid_array[i]);
-            io_read = get_io_bytes_read(pid_array[i]);    
+            switches = get_context_switches(pid_array[i]);    
             printf("\t%d | \t%d | \t%ld | \t%ld\n", 
-                pid_array[i], memory, cpu_time, io_read);  
+                pid_array[i], memory, cpu_time, switches);  
         }
     }
     printf("-------------------------------------------------------------\n");
@@ -201,34 +201,22 @@ long get_exec_time(pid_t pid) {
     return utime + stime;  // Total CPU time in clock ticks
 }
 
-// Function to retrieve I/O read bytes from /proc/[pid]/io
-long get_io_bytes_read(pid_t pid) {
+// function to get number of context switches (voluntary)
+int get_context_switches(pid_t pid) {
     char path[1024];
-    snprintf(path, sizeof(path), "/proc/%d/io", pid);
+    snprintf(path, sizeof(path), "/proc/%d/status", pid);
     FILE *file = fopen(path, "r");
     if (!file) {
-        perror("Could not open /proc/[pid]/io");
+        perror("Could not open /proc/[pid]/status");
         return -1;
     }
-
-    long bytes_read = 0;
-    char line[256];
-    int found = 0;  // Flag to check if read_bytes was found
-
+    int switches = 0;
+    char line[1024];
     while (fgets(line, sizeof(line), file)) {
-        if (strncmp(line, "read_bytes:", 11) == 0) {
-            sscanf(line, "read_bytes: %ld", &bytes_read);
-            found = 1;
-            break;
+        if (strncmp(line, "voluntary_ctxt_switches:", 24) == 0) {
+            sscanf(line, "voluntary_ctxt_switches: %d", switches);
         }
     }
     fclose(file);
-
-    if (!found) {
-        printf("Debug: read_bytes not found in /proc/%d/io\n", pid);
-    } else {
-        printf("Debug: I/O read bytes for PID %d: %ld bytes\n", pid, bytes_read);
-    }
-
-    return bytes_read;  // Total bytes read by the process
+    return switches;
 }
