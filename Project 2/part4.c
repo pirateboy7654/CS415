@@ -165,7 +165,7 @@ int get_mem_usage(pid_t pid) {
     }
 
     int memory = 0;
-    char line[256];
+    char line[1024];
     while (fgets(line, sizeof(line), file)) {
         if (strncmp(line, "VmRSS:", 6) == 0) {  // Look for VmRSS for resident set size
             sscanf(line, "VmRSS: %d", &memory);
@@ -203,7 +203,7 @@ long get_exec_time(pid_t pid) {
 
 // function to get number of context switches (voluntary)
 int get_context_switches(pid_t pid) {
-    char path[1024];
+    char path[40];
     snprintf(path, sizeof(path), "/proc/%d/status", pid);
     FILE *file = fopen(path, "r");
     if (!file) {
@@ -214,7 +214,7 @@ int get_context_switches(pid_t pid) {
     char line[1024];
     while (fgets(line, sizeof(line), file)) {
         if (strncmp(line, "voluntary_ctxt_switches:", 24) == 0) {
-            sscanf(line, "voluntary_ctxt_switches: %d", switches);
+            sscanf(line, "voluntary_ctxt_switches: %d", &switches);
         }
     }
     fclose(file);
