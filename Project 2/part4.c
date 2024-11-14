@@ -144,7 +144,7 @@ void scheduler(int signum) {
             memory = get_mem_usage(pid_array[i]);
             cpu_time = get_exec_time(pid_array[i]);
             io_read = get_io_bytes_read(pid_array[i]);    
-            printf("%-10d | %-12d | %-16ld | %-14ld\n", 
+            printf("\t%d | \t%d | \t%ld | \t%ld\n", 
                 pid_array[i], memory, cpu_time, io_read);  
         }
     }
@@ -192,11 +192,11 @@ long get_exec_time(pid_t pid) {
     char temp[1024];
     for (int i = 1; i <= 13; i++) {  // Skip the first 13 fields
         fscanf(file, "%s", temp);
-        printf("Debug: Field %d: %s\n", i, temp);  // debug
+        //printf("Debug: Field %d: %s\n", i, temp);  // debug
     }
     fscanf(file, "%ld %ld", &utime, &stime);  // Fields 14 and 15
     fclose(file);
-    printf("Debug: CPU time for PID %d: %ld ticks\n", pid, (utime+stime));  // Add this debug line
+    //printf("Debug: CPU time for PID %d: %ld ticks\n", pid, (utime+stime));  // Add this debug line
 
     return utime + stime;  // Total CPU time in clock ticks
 }
