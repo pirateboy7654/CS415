@@ -144,7 +144,7 @@ void scheduler(int signum) {
             memory = get_mem_usage(pid_array[i]);
             cpu_time = get_exec_time(pid_array[i]);
             switches = get_context_switches(pid_array[i]);    
-            printf("%-10d %-12d %-14ld %-16ld\n", 
+            printf("%-10d %-12d \t%-14ld \t\t%-16ld\n", 
                 pid_array[i], memory, cpu_time, switches);  
         }
     }
