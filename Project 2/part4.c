@@ -136,7 +136,7 @@ void scheduler(int signum) {
     int switches;
 
     printf("\nResource Usage:\n");
-    printf("------------------------------------------------------\n");
+    printf("----------------------------------------------------------------\n");
     printf("PID\tMemory (KB)\tCPU Time (ticks)\tContext Switches\n");
     printf("---\t-----------\t----------------\t----------------\n");
     for (int i = 0; i < process_count; i++) {
@@ -148,7 +148,7 @@ void scheduler(int signum) {
                 pid_array[i], memory, cpu_time, switches);  
         }
     }
-    printf("------------------------------------------------------\n");
+    printf("----------------------------------------------------------------\n");
 
     // Reset the alarm for the next time slice
     alarm(time_slice);
