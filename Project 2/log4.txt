@@ -1,0 +1,267 @@
+==2955== Memcheck, a memory error detector
+==2955== Copyright (C) 2002-2022, and GNU GPL'd, by Julian Seward et al.
+==2955== Using Valgrind-3.19.0 and LibVEX; rerun with -h for copyright info
+==2955== Command: ./part4 input.txt
+==2955== 
+total 732
+  0 Report.pdf
+548 project-2-description-fall-2024.pdf
+  8 part4.c
+ 24 part4
+  4 part3.c
+ 24 part3
+  4 part2.c
+ 24 part2
+  4 part1.c
+ 20 part1
+  4 mytest.txt
+  4 Makefile
+  4 log4.txt
+  4 iobound.c
+ 20 iobound
+  4 input.txt
+  4 cpubound.c
+ 20 cpubound
+  4 ..
+  4 .
+Exec failed: No such file or directory
+Child 2958 waiting for SIGUSR1
+==2958== 
+==2958== HEAP SUMMARY:
+==2958==     in use at exit: 472 bytes in 1 blocks
+==2958==   total heap usage: 3 allocs, 2 frees, 8,664 bytes allocated
+==2958== 
+==2958== LEAK SUMMARY:
+==2958==    definitely lost: 0 bytes in 0 blocks
+==2958==    indirectly lost: 0 bytes in 0 blocks
+==2958==      possibly lost: 0 bytes in 0 blocks
+==2958==    still reachable: 472 bytes in 1 blocks
+==2958==         suppressed: 0 bytes in 0 blocks
+==2958== Reachable blocks (those to which a pointer was found) are not shown.
+==2958== To see them, rerun with: --leak-check=full --show-leak-kinds=all
+==2958== 
+==2958== For lists of detected and suppressed errors, rerun with: -s
+==2958== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+Waitpid failed: No child processes
+Starting process 2956
+Scheduler called
+Resuming process 2959
+
+Resource Usage:
+----------------------------------------------------------------
+PID	Memory (KB)	CPU Time (ticks)	Context Switches
+---	-----------	----------------	----------------
+2959       908          	50             		0               
+2960       876          	51             		0               
+----------------------------------------------------------------
+Scheduler called
+Stopping process 2959
+Resuming process 2960
+
+Resource Usage:
+----------------------------------------------------------------
+PID	Memory (KB)	CPU Time (ticks)	Context Switches
+---	-----------	----------------	----------------
+2959       908          	100            		0               
+2960       876          	100            		0               
+----------------------------------------------------------------
+Scheduler called
+Stopping process 2960
+Resuming process 2959
+
+Resource Usage:
+----------------------------------------------------------------
+PID	Memory (KB)	CPU Time (ticks)	Context Switches
+---	-----------	----------------	----------------
+2959       908          	100            		1               
+2960       876          	200            		0               
+----------------------------------------------------------------
+Scheduler called
+Stopping process 2959
+Resuming process 2960
+
+Resource Usage:
+----------------------------------------------------------------
+PID	Memory (KB)	CPU Time (ticks)	Context Switches
+---	-----------	----------------	----------------
+2959       908          	201            		1               
+2960       876          	200            		1               
+----------------------------------------------------------------
+Scheduler called
+Stopping process 2960
+Resuming process 2959
+
+Resource Usage:
+----------------------------------------------------------------
+PID	Memory (KB)	CPU Time (ticks)	Context Switches
+---	-----------	----------------	----------------
+2959       908          	201            		2               
+2960       876          	300            		1               
+----------------------------------------------------------------
+Scheduler called
+Stopping process 2959
+Resuming process 2960
+
+Resource Usage:
+----------------------------------------------------------------
+PID	Memory (KB)	CPU Time (ticks)	Context Switches
+---	-----------	----------------	----------------
+2959       908          	300            		2               
+2960       876          	300            		2               
+----------------------------------------------------------------
+Scheduler called
+Stopping process 2960
+Resuming process 2959
+
+Resource Usage:
+----------------------------------------------------------------
+PID	Memory (KB)	CPU Time (ticks)	Context Switches
+---	-----------	----------------	----------------
+2959       908          	300            		3               
+2960       876          	400            		2               
+----------------------------------------------------------------
+Scheduler called
+Stopping process 2959
+Resuming process 2960
+
+Resource Usage:
+----------------------------------------------------------------
+PID	Memory (KB)	CPU Time (ticks)	Context Switches
+---	-----------	----------------	----------------
+2959       908          	400            		3               
+2960       876          	400            		3               
+----------------------------------------------------------------
+Scheduler called
+Stopping process 2960
+Resuming process 2959
+
+Resource Usage:
+----------------------------------------------------------------
+PID	Memory (KB)	CPU Time (ticks)	Context Switches
+---	-----------	----------------	----------------
+2959       908          	400            		4               
+2960       876          	500            		3               
+----------------------------------------------------------------
+Scheduler called
+Stopping process 2959
+Resuming process 2960
+
+Resource Usage:
+----------------------------------------------------------------
+PID	Memory (KB)	CPU Time (ticks)	Context Switches
+---	-----------	----------------	----------------
+2959       908     Process: 2960 - Begining calculation.
+Process: 2960 - Finished.
+Process: 2959 - Begining to write to file.
+Process: 2959 - Finished.
+Waitpid failed: No child processes
+     	501            		4               
+2960       876          	500            		4               
+----------------------------------------------------------------
+Scheduler called
+Stopping process 2960
+Resuming process 2959
+
+Resource Usage:
+----------------------------------------------------------------
+PID	Memory (KB)	CPU Time (ticks)	Context Switches
+---	-----------	----------------	----------------
+2959       908          	501            		5               
+2960       876          	601            		4               
+----------------------------------------------------------------
+Scheduler called
+Stopping process 2959
+Resuming process 2960
+
+Resource Usage:
+----------------------------------------------------------------
+PID	Memory (KB)	CPU Time (ticks)	Context Switches
+---	-----------	----------------	----------------
+2959       908          	601            		5               
+2960       876          	601            		5               
+----------------------------------------------------------------
+Scheduler called
+Stopping process 2960
+Resuming process 2959
+
+Resource Usage:
+----------------------------------------------------------------
+PID	Memory (KB)	CPU Time (ticks)	Context Switches
+---	-----------	----------------	----------------
+2959       908          	601            		6               
+2960       876          	701            		5               
+----------------------------------------------------------------
+Scheduler called
+Stopping process 2959
+Resuming process 2960
+
+Resource Usage:
+----------------------------------------------------------------
+PID	Memory (KB)	CPU Time (ticks)	Context Switches
+---	-----------	----------------	----------------
+2959       908          	702            		6               
+2960       876          	701            		6               
+----------------------------------------------------------------
+Scheduler called
+Stopping process 2960
+Resuming process 2959
+
+Resource Usage:
+----------------------------------------------------------------
+PID	Memory (KB)	CPU Time (ticks)	Context Switches
+---	-----------	----------------	----------------
+2959       908          	702            		7               
+2960       876          	801            		6               
+----------------------------------------------------------------
+Scheduler called
+Stopping process 2959
+Resuming process 2960
+
+Resource Usage:
+----------------------------------------------------------------
+PID	Memory (KB)	CPU Time (ticks)	Context Switches
+---	-----------	----------------	----------------
+2959       908          	802            		7               
+2960       876          	801            		7               
+----------------------------------------------------------------
+Scheduler called
+Stopping process 2960
+Resuming process 2959
+
+Resource Usage:
+----------------------------------------------------------------
+PID	Memory (KB)	CPU Time (ticks)	Context Switches
+---	-----------	----------------	----------------
+2959       908          	802            		8               
+2960       876          	902            		7               
+----------------------------------------------------------------
+Scheduler called
+Stopping process 2959
+Resuming process 2960
+
+Resource Usage:
+----------------------------------------------------------------
+PID	Memory (KB)	CPU Time (ticks)	Context Switches
+---	-----------	----------------	----------------
+2959       908          	904            		8               
+2960       876          	902            		8               
+----------------------------------------------------------------
+Scheduler called
+Resuming process 2959
+
+Resource Usage:
+----------------------------------------------------------------
+PID	Memory (KB)	CPU Time (ticks)	Context Switches
+---	-----------	----------------	----------------
+2959       908          	904            		9               
+----------------------------------------------------------------
+Exiting now
+==2955== 
+==2955== HEAP SUMMARY:
+==2955==     in use at exit: 0 bytes in 0 blocks
+==2955==   total heap usage: 225 allocs, 225 frees, 174,720 bytes allocated
+==2955== 
+==2955== All heap blocks were freed -- no leaks are possible
+==2955== 
+==2955== For lists of detected and suppressed errors, rerun with: -s
+==2955== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)

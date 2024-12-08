@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "/Users/jamiewhiting/Desktop/Classes/CS 415/CS415_git",
+      "program": "/Users/jamiewhiting/Desktop/Classes/CS 415/CS415_git/build/Debug/outDebug"
+    }
+  ]
+}

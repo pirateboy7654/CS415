@@ -1,0 +1,146 @@
+==2962== Memcheck, a memory error detector
+==2962== Copyright (C) 2002-2022, and GNU GPL'd, by Julian Seward et al.
+==2962== Using Valgrind-3.19.0 and LibVEX; rerun with -h for copyright info
+==2962== Command: ./part3 input.txt
+==2962== 
+total 744
+  0 Report.pdf
+548 project-2-description-fall-2024.pdf
+  8 part4.c
+ 24 part4
+  4 part3.c
+ 24 part3
+  4 part2.c
+ 24 part2
+  4 part1.c
+ 20 part1
+  4 mytest.txt
+  4 Makefile
+ 12 log4.txt
+  4 log3.txt
+  4 iobound.c
+ 20 iobound
+  4 input.txt
+  4 cpubound.c
+ 20 cpubound
+  4 ..
+  4 .
+Exec failed: No such file or directory
+Child 2965 waiting for SIGUSR1
+==2965== 
+==2965== HEAP SUMMARY:
+==2965==     in use at exit: 472 bytes in 1 blocks
+==2965==   total heap usage: 3 allocs, 2 frees, 8,664 bytes allocated
+==2965== 
+==2965== LEAK SUMMARY:
+==2965==    definitely lost: 0 bytes in 0 blocks
+==2965==    indirectly lost: 0 bytes in 0 blocks
+==2965==      possibly lost: 0 bytes in 0 blocks
+==2965==    still reachable: 472 bytes in 1 blocks
+==2965==         suppressed: 0 bytes in 0 blocks
+==2965== Reachable blocks (those to which a pointer was found) are not shown.
+==2965== To see them, rerun with: --leak-check=full --show-leak-kinds=all
+==2965== 
+==2965== For lists of detected and suppressed errors, rerun with: -s
+==2965== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+Process: 2967 - Begining calculation.
+Process: 2967 - Finished.
+Process: 2966 - Begining to write to file.
+Process: 2966 - Finished.
+Starting process 2963
+Stopping process 2963
+Resuming process 2964
+Stopping process 2964
+Resuming process 2965
+Stopping process 2965
+Resuming process 2966
+Stopping process 2966
+Resuming process 2967
+Stopping process 2967
+Resuming process 2963
+Stopping process 2963
+Resuming process 2964
+Stopping process 2964
+Resuming process 2965
+Stopping process 2965
+Resuming process 2966
+Stopping process 2966
+Resuming process 2967
+Stopping process 2967
+Resuming process 2963
+Stopping process 2963
+Resuming process 2964
+Stopping process 2964
+Resuming process 2965
+Stopping process 2965
+Resuming process 2966
+Stopping process 2966
+Resuming process 2967
+Stopping process 2967
+Resuming process 2963
+Stopping process 2963
+Resuming process 2964
+Stopping process 2964
+Resuming process 2965
+Stopping process 2965
+Resuming process 2966
+Stopping process 2966
+Resuming process 2967
+Stopping process 2967
+Resuming process 2963
+Stopping process 2963
+Resuming process 2964
+Stopping process 2964
+Resuming process 2965
+Stopping process 2965
+Resuming process 2966
+Stopping process 2966
+Resuming process 2967
+Stopping process 2967
+Resuming process 2963
+Stopping process 2963
+Resuming process 2964
+Stopping process 2964
+Resuming process 2965
+Stopping process 2965
+Resuming process 2966
+Stopping process 2966
+Resuming process 2967
+Stopping process 2967
+Resuming process 2963
+Stopping process 2963
+Resuming process 2964
+Stopping process 2964
+Resuming process 2965
+Stopping process 2965
+Resuming process 2966
+Stopping process 2966
+Resuming process 2967
+Stopping process 2967
+Resuming process 2963
+Stopping process 2963
+Resuming process 2964
+Stopping process 2964
+Resuming process 2965
+Stopping process 2965
+Resuming process 2966
+Stopping process 2966
+Resuming process 2967
+Stopping process 2967
+Resuming process 2963
+Stopping process 2963
+Resuming process 2964
+Stopping process 2964
+Resuming process 2965
+Stopping process 2965
+Resuming process 2966
+Exiting now
+==2962== 
+==2962== HEAP SUMMARY:
+==2962==     in use at exit: 0 bytes in 0 blocks
+==2962==   total heap usage: 3 allocs, 3 frees, 8,664 bytes allocated
+==2962== 
+==2962== All heap blocks were freed -- no leaks are possible
+==2962== 
+==2962== For lists of detected and suppressed errors, rerun with: -s
+==2962== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
