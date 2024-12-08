@@ -11,8 +11,8 @@ void process_transactions();
 void write_output(const char *filename);
 void update_balance();
 
-const int max_accounts = 11;
-const int max_transactions = 120052;
+#define max_accounts 11
+#define max_transactions 120052
 
 // global arrays
 account accounts[max_accounts];
