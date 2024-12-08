@@ -11,8 +11,8 @@ void* thread_process_transactions(void* arg);
 void write_output(const char *filename);
 void* update_balance(void* arg);
 
-const int max_accounts = 11;
-const int max_transactions = 120052;
+#define max_accounts 11
+#define max_transactions 120052
 
 // global arrays
 account accounts[max_accounts];
@@ -147,14 +147,17 @@ void* thread_process_transactions(void* arg) {
     } else {
         end = start + transactions_per_thread; // first 9 split
     }
+    printf("Thread %d processing transactions from %d to %d\n", thread_id, start, end);
 
+    int found_account = 0; 
     for (int i = start; i < end; i++) {
         transaction *t = &transactions[i];
-
+        found_account = 0; 
         for (int j = 0; j < num_accounts; j++) {
             account *acc = &accounts[j];
 
             if (strcmp(acc->account_number, t->src_account) == 0) {
+                found_account = 1;
                 if (strcmp(acc->password, t->password) != 0) {
                     printf("Invalid password for account %s\n", acc->account_number);
                     break; }
@@ -180,7 +183,11 @@ void* thread_process_transactions(void* arg) {
                         }}}
                 pthread_mutex_unlock(&acc->ac_lock); // Unlock the account
                 break;
-    }}}
+    }   
+    if (found_account == 0) {
+        //printf("src acc %s not found\n", t->src_account);
+    }
+    }}
 
     return NULL;
 }
