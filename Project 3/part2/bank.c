@@ -109,7 +109,7 @@ void read_input(const char *filename) {
 
         // init other fields
         accounts[i].transaction_tracter = 0.0;
-        snprintf(accounts[i].out_file, "account_%s.txt", accounts[i].account_number);
+        snprintf(accounts[i].out_file, sizeof(accounts[i].out_file),"account_%s.txt", accounts[i].account_number);
         pthread_mutex_init(&accounts[i].ac_lock, NULL);
     }
 
