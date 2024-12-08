@@ -11,25 +11,25 @@ void* thread_process_transactions(void* arg);
 void write_output(const char *filename);
 void* update_balance(void* arg);
 
-const int max_accounts = 11;
-const int max_transactions = 120052;
-
-// global arrays
-account accounts[max_accounts];
-transaction transactions[max_transactions];
-
-// counters
-int num_accounts = 0;
-int num_transactions = 0;
-pthread_mutex_t transaction_counter_lock;
-int transaction_counter = 0;
-int num_threads = 10;
-
 int main(int argc, char *argv[]) {
     if (argc != 2) { //wrong arg input check
         fprintf(stderr, "Usage: %s <input file>\n", argv[0]);
         return 1;
     }
+
+    int max_accounts = 11;
+    int max_transactions = 120052;
+
+    // global arrays
+    account accounts[max_accounts];
+    transaction transactions[max_transactions];
+
+    // counters
+    int num_accounts = 0;
+    int num_transactions = 0;
+    pthread_mutex_t transaction_counter_lock;
+    int transaction_counter = 0;
+    int num_threads = 10;   
 
     pthread_t threads[num_threads];
     int thread_ids[num_threads];
