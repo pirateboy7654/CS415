@@ -3,7 +3,7 @@ CFLAGS = -pthread
 
 TARGET = bank
 
-SRCS = bank.c ../string_parser.c
+SRCS = bank.c string_parser.c
 
 all:
 	$(CC) $(CFLAGS) -o $(TARGET) $(SRCS)
