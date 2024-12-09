@@ -292,7 +292,7 @@ void auditor_process(int read_fd) {
 
     char buffer[256];
     ssize_t bytes_read;
-    while ((bytes_read = (read_fd, buffer, sizeof(buffer))) > 0) {
+    while ((bytes_read = read(read_fd, buffer, sizeof(buffer))) > 0) {
         buffer[bytes_read] = '\0'; // null-terminate the string
         fprintf(ledger, "%s\n", buffer);
     }
