@@ -101,7 +101,7 @@ void read_input(const char *filename) {
         exit(1);
     }
 
-    char buffer[256];
+    char buffer[1024];
     const char *delim = " "; // delim for transactions
 
     // read number of accounts (first line)
@@ -224,7 +224,7 @@ void* thread_process_transactions(void* arg) {
                     pthread_mutex_lock(&transaction_counter_lock);
                     transaction_counter++;
                     if (transaction_counter % 500 == 0) {
-                        char log_entry[256];
+                        char log_entry[1024];
                         time_t now = time(NULL);
                         snprintf(log_entry, sizeof(log_entry),
                                 "Worker checked balance of Account %s. Balance is %.2f. Check ocurred at %s",
@@ -271,7 +271,7 @@ void* update_balance(void* arg) {
         //printf("balance for account %d : %.2f\n", i, accounts[i].balance); // debug
         accounts[i].transaction_tracter = 0.0; // reset tracker after updating
 
-        char message[256];
+        char message[1024];
         time_t now = time(NULL);
         snprintf(message, sizeof(message), 
                  "Applied Interest to Account %s. New Balance is %.2f. Time of Update: %s", 
@@ -290,7 +290,7 @@ void auditor_process(int read_fd) {
         exit(1);
     }
 
-    char buffer[256];
+    char buffer[1024];
     ssize_t bytes_read;
     while ((bytes_read = read(read_fd, buffer, sizeof(buffer))) > 0) {
         buffer[bytes_read] = '\0'; // null-terminate the string
