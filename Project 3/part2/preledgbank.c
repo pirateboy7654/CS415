@@ -4,12 +4,16 @@
 #include <pthread.h>
 #include "../account.h"
 #include "../string_parser.h"
+#include "unistd.h"
+#include "sys/types.h"
+#include "sys/wait.h"
 
 // func declarations
 void read_input(const char *filename);
 void* thread_process_transactions(void* arg);
 void write_output(const char *filename);
 void* update_balance(void* arg);
+void auditor_process(int read_fd);
 
 #define max_accounts 11
 #define max_transactions 120052
@@ -24,6 +28,7 @@ int num_transactions = 0;
 pthread_mutex_t transaction_counter_lock;
 int transaction_counter = 0;
 int num_threads = 10;
+int pipe_fd[2]; // file descriptors for the pipe
 
 int main(int argc, char *argv[]) {
     if (argc != 2) { //wrong arg input check
@@ -37,6 +42,26 @@ int main(int argc, char *argv[]) {
     // init mutex for transaction counter
     pthread_mutex_init(&transaction_counter_lock, NULL);
 
+    // Create a pipe for communication with the auditor
+    if (pipe(pipe_fd) == -1) {
+        perror("Pipe creation failed");
+        exit(1);
+    }
+
+    // Fork to create the auditor process
+    pid_t pid = fork();
+    if (pid < 0) {
+        perror("Fork failed");
+        exit(1);
+    } else if (pid == 0) {
+        // Child process: Auditor
+        close(pipe_fd[1]); // Close unused write end
+        auditor_process(pipe_fd[0]); // Auditor reads from the pipe
+        exit(0);
+    }
+
+    // Parent process: Duck Bank
+    close(pipe_fd[0]); // Close unused read end
     read_input(argv[1]);
 
     // create all threads
@@ -49,7 +74,27 @@ int main(int argc, char *argv[]) {
         pthread_join(threads[i], NULL);
     }
     update_balance(NULL);
+
+    // Log final balances to the pipe
+    for (int i = 0; i < num_accounts; i++) {
+        char log_entry[256];
+        snprintf(log_entry, sizeof(log_entry), "Final Balance: Account %s, Balance %.2f",
+                 accounts[i].account_number, accounts[i].balance);
+        if (write(pipe_fd[1], log_entry, strlen(log_entry) + 1) == -1) {
+            perror("Write to pipe failed");
+        }
+    }
+
+
     write_output("output.txt");
+
+
+    // Signal auditor process to stop by closing the write end of the pipe
+    close(pipe_fd[1]);
+
+    // Wait for the auditor process to finish
+    wait(NULL);
+
 
     // cleanup mutexes
     for (int i = 0; i < num_accounts; i++) {
@@ -153,19 +198,33 @@ void* thread_process_transactions(void* arg) {
     }
     printf("Thread %d processing transactions from %d to %d\n", thread_id, start, end);
 
-    int found_account = 0; 
+    //int found_account = 0; 
     for (int i = start; i < end; i++) {
         transaction *t = &transactions[i];
-        found_account = 0; 
+        //found_account = 0; 
         for (int j = 0; j < num_accounts; j++) {
             account *acc = &accounts[j];
 
             if (strcmp(acc->account_number, t->src_account) == 0) {
-                found_account = 1;
+                //found_account = 1;
                 if (strcmp(acc->password, t->password) != 0) {
                     printf("Invalid password for account %s\n", acc->account_number);
                     break; }
 
+                // Successful transaction processing
+                pthread_mutex_lock(&transaction_counter_lock);
+                transaction_counter++;
+                if (transaction_counter % 500 == 0) {
+                    char log_entry[256];
+                    time_t now = time(NULL);
+                    snprintf(log_entry, sizeof(log_entry),
+                             "Check Balance: Account %s, Balance %.2f, Time %s",
+                             acc->account_number, acc->balance, ctime(&now)); // ctime adds a newline
+                    if (write(pipe_fd[1], log_entry, strlen(log_entry) + 1) == -1) {
+                        perror("Write to pipe failed");
+                    }
+                }
+                pthread_mutex_unlock(&transaction_counter_lock);
                 pthread_mutex_lock(&acc->ac_lock); // Lock the account before modifying it
                 if (t->type == 'D') {
                     acc->balance += t->amount;
@@ -188,9 +247,9 @@ void* thread_process_transactions(void* arg) {
                 pthread_mutex_unlock(&acc->ac_lock); // Unlock the account
                 break;
     }   
-    if (found_account == 0) {
+    /*if (found_account == 0) {
         //printf("src acc %s not found\n", t->src_account);
-    }
+    }*/
     }}
 
     return NULL;
@@ -222,4 +281,20 @@ void* update_balance(void* arg) {
         pthread_mutex_unlock(&accounts[i].ac_lock); // unlock thread
     }
     return NULL;
+}
+
+void auditor_process(int read_fd) {
+    FILE *ledger = fopen("ledger.txt", "w");
+    if (!ledger) {
+        perror("Failed to open ledger.txt");
+        exit(1);
+    }
+
+    char buffer[256];
+    while (read(read_fd, buffer, sizeof(buffer)) > 0) {
+        fprintf(ledger, "%s\n", buffer);
+    }
+
+    fclose(ledger);
+    close(read_fd); // Close the read end of the pipe
 }
