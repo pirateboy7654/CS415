@@ -200,19 +200,7 @@ void* thread_process_transactions(void* arg) {
                     break; }
 
                 // Successful transaction processing
-                pthread_mutex_lock(&transaction_counter_lock);
-                transaction_counter++;
-                if (transaction_counter % 500 == 0) {
-                    char log_entry[256];
-                    time_t now = time(NULL);
-                    snprintf(log_entry, sizeof(log_entry),
-                             "Worker check balance of Account %s. Balance is %.2f. Check ocurred at %s",
-                             acc->account_number, acc->balance, ctime(&now)); // 
-                    if (write(pipe_fd[1], log_entry, strlen(log_entry) + 1) == -1) {
-                        perror("Write to pipe failed");
-                    }
-                }
-                pthread_mutex_unlock(&transaction_counter_lock);
+                
                 pthread_mutex_lock(&acc->ac_lock); // Lock the account before modifying it
                 if (t->type == 'D') {
                     acc->balance += t->amount;
@@ -231,7 +219,23 @@ void* thread_process_transactions(void* arg) {
                             accounts[k].balance += t->amount;
                             pthread_mutex_unlock(&accounts[k].ac_lock);
                             break;
-                        }}}
+                        }}
+                } else if (t->type == 'C') {
+                    pthread_mutex_lock(&transaction_counter_lock);
+                    transaction_counter++;
+                    if (transaction_counter % 500 == 0) {
+                        char log_entry[256];
+                        time_t now = time(NULL);
+                        snprintf(log_entry, sizeof(log_entry),
+                                "Worker checked balance of Account %s. Balance is %.2f. Check ocurred at %s",
+                                acc->account_number, acc->balance, ctime(&now)); // 
+                        if (write(pipe_fd[1], log_entry, strlen(log_entry) + 1) == -1) {
+                            perror("Write to pipe failed");
+                        }
+                    }
+                    pthread_mutex_unlock(&transaction_counter_lock);
+                }
+                    
                 pthread_mutex_unlock(&acc->ac_lock); // Unlock the account
                 break;
     }   
