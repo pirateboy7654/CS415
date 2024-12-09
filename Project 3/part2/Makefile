@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -pthread
+CFLAGS = -pthread -g -lpthread
 
 TARGET = bank
 
@@ -11,4 +11,4 @@ all:
 clean:
 	rm -f $(TARGET)
 	rm output.txt
-
+	rm ledger.txt

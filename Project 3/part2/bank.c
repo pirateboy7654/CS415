@@ -4,12 +4,16 @@
 #include <pthread.h>
 #include "../account.h"
 #include "../string_parser.h"
+#include "unistd.h"
+#include "sys/types.h"
+#include "sys/wait.h"
 
 // func declarations
 void read_input(const char *filename);
 void* thread_process_transactions(void* arg);
 void write_output(const char *filename);
 void* update_balance(void* arg);
+void run_auditor(int read_fd);
 
 #define max_accounts 11
 #define max_transactions 120052
@@ -25,10 +29,35 @@ pthread_mutex_t transaction_counter_lock;
 int transaction_counter = 0;
 int num_threads = 10;
 
+int pipe_fd[2]; // file descriptors for the pipe
+
 int main(int argc, char *argv[]) {
     if (argc != 2) { //wrong arg input check
         fprintf(stderr, "Usage: %s <input file>\n", argv[0]);
         return 1;
+    }
+
+    pid_t pid;
+
+    // create the pipe
+    if (pipe(pipe_fd) == -1) {
+        perror("Failed to create pipe");
+        exit(1);
+    }
+
+    // fork the auditor process
+    pid = fork();
+
+    if (pid < 0) { // fork failed
+        perror("Fork failed");
+        exit(1);
+    } else if (pid == 0) { // auditor child process 
+        close(pipe_fd[1]); // close the write end of the pipe
+        run_auditor(pipe_fd[0]);
+        exit(0);
+    } else { // duck bank parent process 
+        close(pipe_fd[0]); // close the read end of the pipe
+        // pass pipe_fd[1] to worker and bank threads
     }
 
     pthread_t threads[num_threads];
@@ -141,7 +170,7 @@ void read_input(const char *filename) {
 
 void* thread_process_transactions(void* arg) {
     int thread_id = *(int*)arg;
-
+    int check_balance_count = 0;
     // divide transactions among threads
     int transactions_per_thread = num_transactions / num_threads;
     int start = thread_id * transactions_per_thread;
@@ -173,7 +202,24 @@ void* thread_process_transactions(void* arg) {
                 } else if (t->type == 'W') {
                     acc->balance -= t->amount;
                     acc->transaction_tracter += t->amount;
-                } else if (t->type == 'T') {
+                } else if (t->type == 'C') { // check balance
+                    //printf("Balance for account %s: %.2f\n", acc->account_number, acc->balance); // Check balance
+                    check_balance_count++;
+                    pthread_mutex_lock(&accounts[j].ac_lock); // lock for reading balance
+                    double balance = accounts[j].balance;
+                    pthread_mutex_unlock(&accounts[j].ac_lock);
+
+                    if (check_balance_count % 500 == 0) {
+                        char message[256];
+                        time_t now = time(NULL); // Get the current time
+                        snprintf(message, sizeof(message), 
+                                "Worker checked balance of Account %s. Balance is $%.2f. Check ocurred at %s\n",
+                                t->src_account, accounts[i].balance, ctime(&now));
+                        write(pipe_fd[1], message, strlen(message)); // Write to pipe
+                    }
+                    break;
+                }
+                else if (t->type == 'T') {
                     acc->balance -= t->amount;
                     acc->transaction_tracter += t->amount;
 
@@ -219,9 +265,37 @@ void* update_balance(void* arg) {
         accounts[i].balance += accounts[i].transaction_tracter * accounts[i].reward_rate;
         //printf("balance for account %d : %.2f\n", i, accounts[i].balance); // debug
         accounts[i].transaction_tracter = 0.0; // reset tracker after updating
+
+        char message[256];
+        time_t now = time(NULL);
+        snprintf(message, sizeof(message), 
+                 "Applied Interest to Account %s. New Balance is %.2f. Time of Update: %s", 
+                 accounts[i].account_number, accounts[i].balance, ctime(&now));
+        write(pipe_fd[1], message, strlen(message));
+
         pthread_mutex_unlock(&accounts[i].ac_lock); // unlock thread
     }
     return NULL;
 }
 
+void run_auditor(int read_fd) {
+    FILE *ledger = fopen("ledger.txt", "w");
+    if (!ledger) {
+        perror("Failed to open ledger.txt");
+        exit(1);
+    }
 
+    char buffer[256];
+    int lines_written = 0;
+
+    while (lines_written < 30) {
+        ssize_t bytes_read = read(read_fd, buffer, sizeof(buffer) - 1);
+        if (bytes_read > 0) {
+            buffer[bytes_read] = '\0'; // Null-terminate the string
+            fprintf(ledger, "%s", buffer); // Write to ledger.txt
+            lines_written++;
+        }
+    }
+
+    fclose(ledger);
+}

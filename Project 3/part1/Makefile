@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -pthread
+CFLAGS = -pthread -g -lpthread
 
 TARGET = bank
 
