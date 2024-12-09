@@ -65,11 +65,13 @@ int main(int argc, char *argv[]) {
     read_input(argv[1]);
 
     // create all threads
+    printf("creating threads\n");
     for (int i = 0; i < num_threads; i++) {
         thread_ids[i] = i;
         pthread_create(&threads[i], NULL, thread_process_transactions, &thread_ids[i]);
     }
     // join threads
+    printf("joining threads\n");
     for (int i = 0; i < num_threads; i++) {
         pthread_join(threads[i], NULL);
     }
