@@ -75,19 +75,7 @@ int main(int argc, char *argv[]) {
     }
     update_balance(NULL);
 
-    // Log final balances to the pipe
-    for (int i = 0; i < num_accounts; i++) {
-        char log_entry[256];
-        snprintf(log_entry, sizeof(log_entry), "Final Balance: Account %s, Balance %.2f",
-                 accounts[i].account_number, accounts[i].balance);
-        if (write(pipe_fd[1], log_entry, strlen(log_entry) + 1) == -1) {
-            perror("Write to pipe failed");
-        }
-    }
-
-
     write_output("output.txt");
-
 
     // Signal auditor process to stop by closing the write end of the pipe
     close(pipe_fd[1]);
@@ -218,8 +206,8 @@ void* thread_process_transactions(void* arg) {
                     char log_entry[256];
                     time_t now = time(NULL);
                     snprintf(log_entry, sizeof(log_entry),
-                             "Check Balance: Account %s, Balance %.2f, Time %s",
-                             acc->account_number, acc->balance, ctime(&now)); // ctime adds a newline
+                             "Worker check balance of Account %s. Balance is %.2f. Check ocurred at %s",
+                             acc->account_number, acc->balance, ctime(&now)); // 
                     if (write(pipe_fd[1], log_entry, strlen(log_entry) + 1) == -1) {
                         perror("Write to pipe failed");
                     }
@@ -278,6 +266,14 @@ void* update_balance(void* arg) {
         accounts[i].balance += accounts[i].transaction_tracter * accounts[i].reward_rate;
         //printf("balance for account %d : %.2f\n", i, accounts[i].balance); // debug
         accounts[i].transaction_tracter = 0.0; // reset tracker after updating
+
+        char message[256];
+        time_t now = time(NULL);
+        snprintf(message, sizeof(message), 
+                 "Applied Interest to Account %s. New Balance is %.2f. Time of Update: %s", 
+                 accounts[i].account_number, accounts[i].balance, ctime(&now));
+        write(pipe_fd[1], message, strlen(message));
+
         pthread_mutex_unlock(&accounts[i].ac_lock); // unlock thread
     }
     return NULL;
