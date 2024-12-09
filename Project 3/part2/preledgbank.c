@@ -73,8 +73,10 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < num_threads; i++) {
         pthread_join(threads[i], NULL);
     }
+    printf("calling update balance\n");
     update_balance(NULL);
 
+    printf("calling write output\n");
     write_output("output.txt");
 
     // Signal auditor process to stop by closing the write end of the pipe
