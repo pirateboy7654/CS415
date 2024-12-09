@@ -178,6 +178,7 @@ void read_input(const char *filename) {
 }
 
 void* thread_process_transactions(void* arg) {
+
     int thread_id = *(int*)arg;
 
     // divide transactions among threads
@@ -248,7 +249,7 @@ void* thread_process_transactions(void* arg) {
         //printf("src acc %s not found\n", t->src_account);
     }*/
     }}
-
+    printf("thread %d finished\n", thread_id);
     return NULL;
 }
 
