@@ -78,8 +78,12 @@ int main(int argc, char *argv[]) {
         pthread_join(threads[i], NULL);
     }
     update_balance(NULL);
+    printf("Update balance completed. Closing the pipe.\n");
     write_output("output.txt");
-
+    printf("Closing the write end of the pipe.\n");
+    close(pipe_fd[1]);
+    printf("Write end of the pipe closed.\n");
+    wait(NULL);
     // cleanup mutexes
     for (int i = 0; i < num_accounts; i++) {
         pthread_mutex_destroy(&accounts[i].ac_lock);
@@ -275,6 +279,7 @@ void* update_balance(void* arg) {
 
         pthread_mutex_unlock(&accounts[i].ac_lock); // unlock thread
     }
+    printf("Update balance messages sent to the Auditor.\n");
     return NULL;
 }
 
@@ -288,12 +293,18 @@ void run_auditor(int read_fd) {
     char buffer[256];
     int lines_written = 0;
 
-    while (lines_written < 30) {
+    while (1) {
         ssize_t bytes_read = read(read_fd, buffer, sizeof(buffer) - 1);
         if (bytes_read > 0) {
             buffer[bytes_read] = '\0'; // Null-terminate the string
             fprintf(ledger, "%s", buffer); // Write to ledger.txt
             lines_written++;
+        } else if (bytes_read == 0) { // end of file
+            printf("Auditor received EOF. Exiting...\n");
+            break;
+        } else {
+            perror("failed to read from pipe\n");
+            break;
         }
     }
 
