@@ -10,3 +10,4 @@ all:
 
 clean:
 	rm -f $(TARGET)
+	rm output.txt

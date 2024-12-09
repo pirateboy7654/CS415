@@ -110,7 +110,7 @@ void read_input(const char *filename) {
         // init other fields
         accounts[i].transaction_tracter = 0.0;
         char temp_out_file[64];
-        snprintf(accounts[i].out_file, sizeof(accounts[i].out_file),"account_%s.txt", accounts[i].account_number);
+        snprintf(temp_out_file, sizeof(temp_out_file),"account_%s.txt", accounts[i].account_number);
         strncpy(accounts[i].out_file, temp_out_file, sizeof(accounts[i].out_file) - 1);
         accounts[i].out_file[sizeof(accounts[i].out_file) - 1] = '\0'; // null terminate
 
