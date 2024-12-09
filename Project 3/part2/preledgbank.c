@@ -78,8 +78,9 @@ int main(int argc, char *argv[]) {
     write_output("output.txt");
 
     // Signal auditor process to stop by closing the write end of the pipe
+    printf("attemping to close pipe \n");
     close(pipe_fd[1]);
-
+    printf("pipe closed\n");
     // Wait for the auditor process to finish
     wait(NULL);
 
@@ -276,7 +277,10 @@ void* update_balance(void* arg) {
         snprintf(message, sizeof(message), 
                  "Applied Interest to Account %s. New Balance is %.2f. Time of Update: %s", 
                  accounts[i].account_number, accounts[i].balance, ctime(&now));
-        write(pipe_fd[1], message, strlen(message));
+        //write(pipe_fd[1], message, strlen(message));
+        if (write(pipe_fd[1], message, strlen(message)) == -1) {
+            perror("Write to pipe failed");
+        }
 
         pthread_mutex_unlock(&accounts[i].ac_lock); // unlock thread
     }
