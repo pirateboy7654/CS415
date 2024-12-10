@@ -4,7 +4,6 @@
 #include <pthread.h>
 #include "../account.h"
 #include "../string_parser.h"
-#define _XOPEN_SOURCE 700
 
 // Function declarations
 void read_input(const char *filename);
