@@ -364,8 +364,10 @@ void* update_savings(void* arg) {
 void write_output(const char *filename) {
     mkdir("output", 0777); // Ensure output directory exists
 
-    // Write final balances to output.txt
-    FILE *file = fopen(filename, "w");
+    // Write final balances to output/output.txt
+    char output_file[256];
+    snprintf(output_file, sizeof(output_file), "output/%s", filename);
+    FILE *file = fopen(output_file, "w");
     if (!file) {
         perror("Failed to open output file");
         exit(1);
@@ -376,7 +378,7 @@ void write_output(const char *filename) {
     }
     fclose(file);
 
-    // Write final savings balances to savings_output.txt
+    // Write final savings balances to savings/savings_output.txt
     mkdir("savings", 0777); // Ensure savings directory exists
     char savings_file[64];
     snprintf(savings_file, sizeof(savings_file), "savings/savings_output.txt");
@@ -391,6 +393,7 @@ void write_output(const char *filename) {
     }
     fclose(savings_output);
 }
+
 
 
 // Initialize shared memory
