@@ -65,6 +65,10 @@ int main(int argc, char *argv[]) {
     pthread_create(&bank_thread, NULL, update_balance, NULL);
 
     // Wait for all threads to be ready
+    for (int i = 0; i < num_threads; i++)
+    {
+        printf("thread %d reach wait barrier\n", thread_ids);
+    }
     pthread_barrier_wait(&start_barrier);
 
     // join threads
