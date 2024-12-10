@@ -230,7 +230,8 @@ void* thread_process_transactions(void* arg) {
                 // check if transactions threshold is reached
                 pthread_mutex_lock(&threshold_mutex);
                 processed_transactions++;
-                if (processed_transactions % TRANSACTION_THRESHOLD == 0) {
+                if (processed_transactions % TRANSACTION_THRESHOLD == 0 ||
+                    processed_transactions >= num_transactions) {
                     bank_ready = 1;
                     pthread_cond_signal(&threshold_cond); // notify bank thread
                 }
