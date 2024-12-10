@@ -292,6 +292,7 @@ void* update_balance(void* arg) {
         printf("Processed transactions: %d, Total transactions: %d\n", processed_transactions, num_transactions);
         if (processed_transactions >= num_transactions) {
             pthread_mutex_unlock(&threshold_mutex);
+            printf("Bank thread: All transactions processed. Exiting.\n");
             break;
         }
         pthread_mutex_unlock(&threshold_mutex);
