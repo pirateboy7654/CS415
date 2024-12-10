@@ -65,12 +65,10 @@ int main(int argc, char *argv[]) {
     pthread_create(&bank_thread, NULL, update_balance, NULL);
 
     // Wait for all threads to be ready
-    for (int i = 0; i < num_threads; i++)
-    {
-        printf("thread %d reach wait barrier\n", thread_ids[i]);
-    }
+    
+    printf("Thread %d reached the barrier.\n", thread_ids);
     pthread_barrier_wait(&start_barrier);
-
+    printf("Thread %d passed the barrier.\n", thread_ids);
     // join threads
     for (int i = 0; i < num_threads; i++) {
         pthread_join(threads[i], NULL);
@@ -291,6 +289,7 @@ void* update_balance(void* arg) {
 
         // Exit condition (if all transactions are processed)
         pthread_mutex_lock(&threshold_mutex);
+        printf("Processed transactions: %d, Total transactions: %d\n", processed_transactions, num_transactions);
         if (processed_transactions >= num_transactions) {
             pthread_mutex_unlock(&threshold_mutex);
             break;
