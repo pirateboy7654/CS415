@@ -193,7 +193,10 @@ void* thread_process_transactions(void* arg) {
 
             if (strcmp(acc->account_number, t->src_account) == 0) {
                 if (strcmp(acc->password, t->password) != 0) {
-                    printf("Invalid password for account %s\n", acc->account_number);
+                    printf("Invalid password for account %s. Skipping transaction.\n", acc->account_number);
+                    pthread_mutex_lock(&threshold_mutex);
+                    processed_transactions++; // Increment for skipped transactions
+                    pthread_mutex_unlock(&threshold_mutex);
                     break;
                 }
 
@@ -240,6 +243,9 @@ void* thread_process_transactions(void* arg) {
     if (processed_transactions >= num_transactions) {
         bank_ready = 1;
         pthread_cond_signal(&threshold_cond);
+        printf("Thread %d: All transactions processed. Final notification sent.\n", thread_id);
+    } else {
+        printf("Thread %d: Remaining transactions to process: %d.\n", thread_id, num_transactions - processed_transactions);
     }
     pthread_mutex_unlock(&threshold_mutex);
 
@@ -254,8 +260,8 @@ void* update_balance(void* arg) {
         pthread_mutex_lock(&threshold_mutex);
         while (!bank_ready) {
             if (processed_transactions >= num_transactions) {
+                printf("Bank thread: All transactions processed (%d/%d). Exiting.\n", processed_transactions, num_transactions);
                 pthread_mutex_unlock(&threshold_mutex);
-                printf("Bank thread: All transactions processed. Exiting after %d updates.\n", total_updates);
                 return NULL; // Exit the thread
             }
             pthread_cond_wait(&threshold_cond, &threshold_mutex);
