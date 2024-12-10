@@ -294,7 +294,7 @@ void* update_balance(void* arg) {
             }
         }
         total_updates++;
-        /*
+        
         // Exit condition (if all transactions are processed)
         pthread_mutex_lock(&threshold_mutex);
         printf("Processed transactions: %d, Total transactions: %d\n", processed_transactions, num_transactions);
@@ -303,7 +303,7 @@ void* update_balance(void* arg) {
             printf("Bank thread: All transactions processed. Exiting.\n");
             break;
         }
-        pthread_mutex_unlock(&threshold_mutex); */
+        pthread_mutex_unlock(&threshold_mutex); 
     }
     printf("Bank thread completed, total updates : %d\n", total_updates);
     return NULL;
