@@ -78,6 +78,7 @@ int main(int argc, char *argv[]) {
     bank_ready = 1;
     pthread_cond_signal(&threshold_cond);
     pthread_mutex_unlock(&threshold_mutex);
+    printf("Main thread: Notified bank thread for final processing.\n");
     pthread_join(bank_thread, NULL);
 
     //update_balance(NULL);
@@ -234,6 +235,7 @@ void* thread_process_transactions(void* arg) {
                     processed_transactions >= num_transactions) {
                     bank_ready = 1;
                     pthread_cond_signal(&threshold_cond); // notify bank thread
+                    printf("Thread %d: Notified bank thread for processing.\n", thread_id);
                 }
                 pthread_mutex_unlock(&threshold_mutex);
                 break;
@@ -280,6 +282,7 @@ void* update_balance(void* arg) {
             break;
         }*/
         bank_ready = 0;
+        printf("Bank thread: Processing update.\n");
         pthread_mutex_unlock(&threshold_mutex);
 
         // Update account balances
@@ -308,7 +311,7 @@ void* update_balance(void* arg) {
             printf("Bank thread: All transactions processed. Exiting.\n");
             break;
         }
-        //pthread_mutex_unlock(&threshold_mutex); 
+        pthread_mutex_unlock(&threshold_mutex); 
         printf("Bank thread completed, total updates : %d\n", total_updates);
     }
     
