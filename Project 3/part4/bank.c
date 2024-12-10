@@ -277,6 +277,7 @@ void* thread_process_transactions(void* arg) {
 
     return NULL;
 }
+// Bank thread function
 void* update_balance(void* arg) {
     int total_updates = 0;
 
@@ -284,17 +285,15 @@ void* update_balance(void* arg) {
         pthread_mutex_lock(&threshold_mutex);
         while (!bank_ready) {
             if (processed_transactions >= num_transactions) {
-                printf("Bank thread: All transactions processed (%d/%d). Exiting.\n", processed_transactions, num_transactions);
                 pthread_mutex_unlock(&threshold_mutex);
                 return NULL; // Exit the thread
             }
             pthread_cond_wait(&threshold_cond, &threshold_mutex);
         }
         bank_ready = 0; // Reset the flag for the next round
-        printf("Bank thread: Processing transactions. Processed: %d/%d\n", processed_transactions, num_transactions);
         pthread_mutex_unlock(&threshold_mutex);
 
-        // Update balances
+        // Update Duck Bank balances
         for (int i = 0; i < num_accounts; i++) {
             pthread_mutex_lock(&accounts[i].ac_lock);
             accounts[i].balance += accounts[i].transaction_tracter * accounts[i].reward_rate;
@@ -302,16 +301,24 @@ void* update_balance(void* arg) {
             pthread_mutex_unlock(&accounts[i].ac_lock);
         }
 
-        // Write individual account updates to files
+        // Write individual account updates to files in "output/"
         for (int i = 0; i < num_accounts; i++) {
-            FILE *file = fopen(accounts[i].out_file, "a");
+            char file_path[256];
+            snprintf(file_path, sizeof(file_path), "output/account_%s.txt", accounts[i].account_number);
+
+            FILE *file = fopen(file_path, "a");
             if (file) {
                 fprintf(file, "Current Balance: \t%.2f\n", accounts[i].balance);
                 fclose(file);
             }
         }
+
+        // Notify Puddles Bank to update savings balances
+        pthread_mutex_lock(&threshold_mutex);
+        printf("Bank thread: Completed update %d. Notifying Puddles Bank.\n", total_updates);
+        pthread_mutex_unlock(&threshold_mutex);
+
         total_updates++;
-        printf("Bank thread: Completed update %d\n", total_updates);
     }
 }
 
@@ -321,13 +328,12 @@ void* update_savings(void* arg) {
         pthread_mutex_lock(&threshold_mutex);
         while (!bank_ready) {
             if (processed_transactions >= num_transactions) {
-                printf("Savings thread: All transactions processed. Exiting.\n");
                 pthread_mutex_unlock(&threshold_mutex);
                 return NULL; // Exit thread
             }
             pthread_cond_wait(&threshold_cond, &threshold_mutex);
         }
-        bank_ready = 0;
+        bank_ready = 0; // Reset the flag
         pthread_mutex_unlock(&threshold_mutex);
 
         // Apply interest to savings accounts
@@ -337,25 +343,48 @@ void* update_savings(void* arg) {
             pthread_mutex_unlock(&accounts[i].ac_lock);
         }
 
-        printf("Savings thread: Interest applied to savings accounts.\n");
+        // Write individual savings updates to files in "savings/"
+        for (int i = 0; i < num_accounts; i++) {
+            char file_path[256];
+            snprintf(file_path, sizeof(file_path), "savings/account_%s_savings.txt", accounts[i].account_number);
+
+            FILE *file = fopen(file_path, "a");
+            if (file) {
+                fprintf(file, "Savings Balance: \t%.2f\n", accounts[i].savings_balance);
+                fclose(file);
+            }
+        }
+
+        printf("Savings thread: Interest applied to all accounts.\n");
     }
 }
 // Write final balances to output file
 void write_output(const char *filename) {
     FILE *file = fopen(filename, "w");
-    if (!file) { // Error check for opening output file
+    if (!file) {
         perror("Failed to open output file");
         exit(1);
     }
 
     for (int i = 0; i < num_accounts; i++) {
-        // Write the index and balance in the required format
-        fprintf(file, "%d balance: \t%.2f\nSavings balance: \t%.2f\n", i, accounts[i].balance, accounts[i].savings_balance);
+        fprintf(file, "Account %d: Final Balance: %.2f\n", i + 1, accounts[i].balance);
+    }
+    fclose(file);
+
+    // Write final savings balances to savings_output.txt
+    char savings_file[64];
+    snprintf(savings_file, sizeof(savings_file), "savings_output.txt");
+    FILE *savings_output = fopen(savings_file, "w");
+    if (!savings_output) {
+        perror("Failed to open savings output file");
+        exit(1);
     }
 
-    fclose(file); // Close output file 
+    for (int i = 0; i < num_accounts; i++) {
+        fprintf(savings_output, "Account %d: Savings Final Balance: %.2f\n", i + 1, accounts[i].savings_balance);
+    }
+    fclose(savings_output);
 }
-
 // Initialize shared memory
 void initialize_shared_memory() {
     shm_fd = shm_open("/duckbank_shared", O_CREAT | O_RDWR, 0666);
