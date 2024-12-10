@@ -280,7 +280,7 @@ void* update_balance(void* arg) {
         for (int i = 0; i < num_accounts; i++) {
             FILE *file = fopen(accounts[i].out_file, "a");
             if (file) {
-                fprintf(file, "%.2f\n", accounts[i].balance);
+                fprintf(file, "Current Balance: \t%.2f\n", accounts[i].balance);
                 fclose(file);
             }
         }
