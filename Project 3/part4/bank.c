@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
+#include <sys/mman.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include "../account.h"
 #include "../string_parser.h"
 
@@ -10,6 +13,8 @@ void read_input(const char *filename);
 void* thread_process_transactions(void* arg);
 void write_output(const char *filename);
 void* update_balance(void* arg);
+void initialize_shared_memory();
+void finalize_shared_memory();
 
 #define max_accounts 11
 #define max_transactions 120052
@@ -33,6 +38,11 @@ int processed_transactions = 0;
 const int TRANSACTION_THRESHOLD = 5000;
 int bank_ready = 0;
 
+// Shared memory variables
+void* shared_mem = NULL;
+size_t shared_mem_size = 0;
+int shm_fd;
+
 int main(int argc, char *argv[]) {
     if (argc != 2) { // Wrong argument input check
         fprintf(stderr, "Usage: %s <input file>\n", argv[0]);
@@ -51,6 +61,9 @@ int main(int argc, char *argv[]) {
 
     read_input(argv[1]);
 
+    // Initialize shared memory for communication with Puddles Bank
+    initialize_shared_memory();
+
     // Create worker threads
     for (int i = 0; i < num_threads; i++) {
         thread_ids[i] = i;
@@ -61,9 +74,9 @@ int main(int argc, char *argv[]) {
     pthread_create(&bank_thread, NULL, update_balance, NULL);
 
     // Wait for all threads to be ready
-    //printf("Main thread reached the barrier.\n");
+    printf("Main thread reached the barrier.\n");
     pthread_barrier_wait(&start_barrier);
-    //printf("Main thread passed the barrier.\n");
+    printf("Main thread passed the barrier.\n");
 
     // Join worker threads
     for (int i = 0; i < num_threads; i++) {
@@ -83,7 +96,10 @@ int main(int argc, char *argv[]) {
 
     write_output("output.txt");
 
-    // Cleanup
+    // Cleanup shared memory
+    finalize_shared_memory();
+
+    // Cleanup synchronization variables
     pthread_barrier_destroy(&start_barrier);
     pthread_mutex_destroy(&threshold_mutex);
     pthread_cond_destroy(&threshold_cond);
@@ -176,14 +192,14 @@ void read_input(const char *filename) {
 // Worker thread function
 void* thread_process_transactions(void* arg) {
     int thread_id = *(int*)arg;
-    //printf("Thread %d waiting at the barrier.\n", thread_id);
+    printf("Thread %d waiting at the barrier.\n", thread_id);
     pthread_barrier_wait(&start_barrier); // Wait until all threads are ready
-    //printf("Thread %d passed the barrier.\n", thread_id);
+    printf("Thread %d passed the barrier.\n", thread_id);
 
     int transactions_per_thread = (num_transactions + num_threads - 1) / num_threads; // Round up
     int start = thread_id * transactions_per_thread;
     int end = (start + transactions_per_thread > num_transactions) ? num_transactions : start + transactions_per_thread;
-    //printf("Thread %d assigned range: %d to %d\n", thread_id, start, end);
+    printf("Thread %d assigned range: %d to %d\n", thread_id, start, end);
 
     for (int i = start; i < end; i++) {
         transaction *t = &transactions[i];
@@ -193,7 +209,7 @@ void* thread_process_transactions(void* arg) {
 
             if (strcmp(acc->account_number, t->src_account) == 0) {
                 if (strcmp(acc->password, t->password) != 0) {
-                    //printf("Invalid password for account %s. Skipping transaction.\n", acc->account_number);
+                    printf("Invalid password for account %s. Skipping transaction.\n", acc->account_number);
                     pthread_mutex_lock(&threshold_mutex);
                     processed_transactions++; // Increment for skipped transactions
                     pthread_mutex_unlock(&threshold_mutex);
@@ -226,11 +242,11 @@ void* thread_process_transactions(void* arg) {
                 // Check if transaction threshold is reached
                 pthread_mutex_lock(&threshold_mutex);
                 processed_transactions++;
-                //("Thread %d: Processed transaction %d/%d\n", thread_id, processed_transactions, num_transactions);
+                printf("Thread %d: Processed transaction %d/%d\n", thread_id, processed_transactions, num_transactions);
                 if (processed_transactions % TRANSACTION_THRESHOLD == 0 || processed_transactions == num_transactions) {
                     bank_ready = 1;
                     pthread_cond_signal(&threshold_cond);
-                    //printf("Thread %d: Notified bank thread.\n", thread_id);
+                    printf("Thread %d: Notified bank thread.\n", thread_id);
                 }
                 pthread_mutex_unlock(&threshold_mutex);
 
@@ -243,9 +259,9 @@ void* thread_process_transactions(void* arg) {
     if (processed_transactions >= num_transactions) {
         bank_ready = 1;
         pthread_cond_signal(&threshold_cond);
-        //printf("Thread %d: All transactions processed. Final notification sent.\n", thread_id);
+        printf("Thread %d: All transactions processed. Final notification sent.\n", thread_id);
     } else {
-        //printf("Thread %d: Remaining transactions to process: %d.\n", thread_id, num_transactions - processed_transactions);
+        printf("Thread %d: Remaining transactions to process: %d.\n", thread_id, num_transactions - processed_transactions);
     }
     pthread_mutex_unlock(&threshold_mutex);
 
@@ -260,14 +276,14 @@ void* update_balance(void* arg) {
         pthread_mutex_lock(&threshold_mutex);
         while (!bank_ready) {
             if (processed_transactions >= num_transactions) {
-                //printf("Bank thread: All transactions processed (%d/%d). Exiting.\n", processed_transactions, num_transactions);
+                printf("Bank thread: All transactions processed (%d/%d). Exiting.\n", processed_transactions, num_transactions);
                 pthread_mutex_unlock(&threshold_mutex);
                 return NULL; // Exit the thread
             }
             pthread_cond_wait(&threshold_cond, &threshold_mutex);
         }
         bank_ready = 0; // Reset the flag for the next round
-        //printf("Bank thread: Processing transactions. Processed: %d/%d\n", processed_transactions, num_transactions);
+        printf("Bank thread: Processing transactions. Processed: %d/%d\n", processed_transactions, num_transactions);
         pthread_mutex_unlock(&threshold_mutex);
 
         // Update balances
@@ -281,14 +297,13 @@ void* update_balance(void* arg) {
         // Write individual account updates to files
         for (int i = 0; i < num_accounts; i++) {
             FILE *file = fopen(accounts[i].out_file, "a");
-            //fprintf(file, "account %d:\n", i);
             if (file) {
                 fprintf(file, "Current Balance: \t%.2f\n", accounts[i].balance);
                 fclose(file);
             }
         }
         total_updates++;
-        //printf("Bank thread: Completed update %d\n", total_updates);
+        printf("Bank thread: Completed update %d\n", total_updates);
     }
 }
 
@@ -306,4 +321,41 @@ void write_output(const char *filename) {
     }
 
     fclose(file); // Close output file 
+}
+
+// Initialize shared memory
+void initialize_shared_memory() {
+    shm_fd = shm_open("/duckbank_shared", O_CREAT | O_RDWR, 0666);
+    if (shm_fd == -1) {
+        perror("Failed to create shared memory");
+        exit(1);
+    }
+
+    shared_mem_size = num_accounts * sizeof(account);
+
+    if (ftruncate(shm_fd, shared_mem_size) == -1) {
+        perror("Failed to set size of shared memory");
+        exit(1);
+    }
+
+    shared_mem = mmap(NULL, shared_mem_size, PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
+    if (shared_mem == MAP_FAILED) {
+        perror("Failed to map shared memory");
+        exit(1);
+    }
+
+    // Copy account data to shared memory
+    memcpy(shared_mem, accounts, shared_mem_size);
+    printf("Shared memory initialized and account data written.\n");
+}
+
+// Finalize shared memory
+void finalize_shared_memory() {
+    if (munmap(shared_mem, shared_mem_size) == -1) {
+        perror("Failed to unmap shared memory");
+    }
+    if (shm_unlink("/duckbank_shared") == -1) {
+        perror("Failed to unlink shared memory");
+    }
+    printf("Shared memory finalized and cleaned up.\n");
 }
