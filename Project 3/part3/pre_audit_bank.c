@@ -6,7 +6,7 @@
 #include "../string_parser.h"
 #define _XOPEN_SOURCE 700
 
-// func declarations
+// Function declarations
 void read_input(const char *filename);
 void* thread_process_transactions(void* arg);
 void write_output(const char *filename);
@@ -15,11 +15,11 @@ void* update_balance(void* arg);
 #define max_accounts 11
 #define max_transactions 120052
 
-// global arrays
+// Global arrays
 account accounts[max_accounts];
 transaction transactions[max_transactions];
 
-// counters
+// Counters
 int num_accounts = 0;
 int num_transactions = 0;
 pthread_mutex_t transaction_counter_lock;
@@ -34,9 +34,8 @@ int processed_transactions = 0;
 const int TRANSACTION_THRESHOLD = 5000;
 int bank_ready = 0;
 
-
 int main(int argc, char *argv[]) {
-    if (argc != 2) { //wrong arg input check
+    if (argc != 2) { // Wrong argument input check
         fprintf(stderr, "Usage: %s <input file>\n", argv[0]);
         return 1;
     }
@@ -49,13 +48,11 @@ int main(int argc, char *argv[]) {
     pthread_barrier_init(&start_barrier, NULL, num_threads + 1);
     pthread_mutex_init(&threshold_mutex, NULL);
     pthread_cond_init(&threshold_cond, NULL);
-
-    // init mutex for transaction counter
     pthread_mutex_init(&transaction_counter_lock, NULL);
 
     read_input(argv[1]);
-    
-    // create all threads
+
+    // Create worker threads
     for (int i = 0; i < num_threads; i++) {
         thread_ids[i] = i;
         pthread_create(&threads[i], NULL, thread_process_transactions, &thread_ids[i]);
@@ -65,26 +62,29 @@ int main(int argc, char *argv[]) {
     pthread_create(&bank_thread, NULL, update_balance, NULL);
 
     // Wait for all threads to be ready
-    
-    printf("Thread %d reached the barrier.\n", thread_ids);
+    printf("Main thread reached the barrier.\n");
     pthread_barrier_wait(&start_barrier);
-    printf("Thread %d passed the barrier.\n", thread_ids);
-    // join threads
+    printf("Main thread passed the barrier.\n");
+
+    // Join worker threads
     for (int i = 0; i < num_threads; i++) {
         pthread_join(threads[i], NULL);
     }
-    // Notify bank thread to finalize and join it
+
+    // Notify bank thread to finalize
     pthread_mutex_lock(&threshold_mutex);
-    bank_ready = 1;
-    pthread_cond_signal(&threshold_cond);
+    if (processed_transactions < num_transactions) {
+        bank_ready = 1;
+        pthread_cond_signal(&threshold_cond);
+        printf("Main thread: Final notification sent to bank thread.\n");
+    }
     pthread_mutex_unlock(&threshold_mutex);
-    printf("Main thread: Notified bank thread for final processing.\n");
+
     pthread_join(bank_thread, NULL);
 
-    //update_balance(NULL);
     write_output("output.txt");
 
-    // cleanup mutexes
+    // Cleanup
     pthread_barrier_destroy(&start_barrier);
     pthread_mutex_destroy(&threshold_mutex);
     pthread_cond_destroy(&threshold_cond);
@@ -96,116 +96,107 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-// read accs and transactions from input file
+// Read accounts and transactions from input file
 void read_input(const char *filename) {
-
     FILE *file = fopen(filename, "r");
-    if (!file) { // file open error check
+    if (!file) { // File open error check
         perror("Failed to open input file");
         exit(1);
     }
 
     char buffer[256];
-    const char *delim = " "; // delim for transactions
+    const char *delim = " "; // Delimiter for transactions
 
-    // read number of accounts (first line)
+    // Read number of accounts (first line)
     if (fgets(buffer, sizeof(buffer), file)) {
         command_line cmd = str_filler(buffer, delim);
         num_accounts = atoi(cmd.command_list[0]);
         free_command_line(&cmd);
     }
 
-    // read account details
+    // Read account details
     for (int i = 0; i < num_accounts; i++) {
-        // skip the "index #" line
+        // Skip the "index #" line
         if (fgets(buffer, sizeof(buffer), file)) {
-            // nothing
+            // Nothing
         }
 
-        // read account number & copy to struct object
+        // Read account number & copy to struct object
         if (fgets(buffer, sizeof(buffer), file)) {
-            buffer[strcspn(buffer, "\n")] = 0; // strip newline char
+            buffer[strcspn(buffer, "\n")] = 0; // Strip newline char
             strcpy(accounts[i].account_number, buffer);
         }
 
-        // read password & copy to struct object
+        // Read password & copy to struct object
         if (fgets(buffer, sizeof(buffer), file)) {
-            buffer[strcspn(buffer, "\n")] = 0; // strip newline char
+            buffer[strcspn(buffer, "\n")] = 0; // Strip newline char
             strcpy(accounts[i].password, buffer);
         }
 
-        // read balance & copy to struct object
+        // Read balance & copy to struct object
         if (fgets(buffer, sizeof(buffer), file)) {
             accounts[i].balance = atof(buffer);
         }
 
-        // read reward rate & copy to struct object
+        // Read reward rate & copy to struct object
         if (fgets(buffer, sizeof(buffer), file)) {
             accounts[i].reward_rate = atof(buffer);
         }
 
-        // init other fields
+        // Initialize other fields
         accounts[i].transaction_tracter = 0.0;
         char temp_out_file[64];
         snprintf(temp_out_file, sizeof(temp_out_file),"account_%s.txt", accounts[i].account_number);
         strncpy(accounts[i].out_file, temp_out_file, sizeof(accounts[i].out_file) - 1);
-        accounts[i].out_file[sizeof(accounts[i].out_file) - 1] = '\0'; // null terminate
-
+        accounts[i].out_file[sizeof(accounts[i].out_file) - 1] = '\0'; // Null terminate
         pthread_mutex_init(&accounts[i].ac_lock, NULL);
     }
 
-    // read transactions
+    // Read transactions
     while (fgets(buffer, sizeof(buffer), file)) {
-        command_line cmd = str_filler(buffer, delim); // get line and tokens
+        command_line cmd = str_filler(buffer, delim); // Get line and tokens
         transaction *t = &transactions[num_transactions]; 
 
-        t->type = cmd.command_list[0][0]; // first char is type (T D W C)
-        strcpy(t->src_account, cmd.command_list[1]); // copy account to t
-        strcpy(t->password, cmd.command_list[2]); // copy password to t
-        // changes based on type, for number or args given 
-        if (t->type == 'T') { // transfer
+        t->type = cmd.command_list[0][0]; // First char is type (T D W C)
+        strcpy(t->src_account, cmd.command_list[1]); // Copy account to t
+        strcpy(t->password, cmd.command_list[2]); // Copy password to t
+        // Changes based on type, for number or args given 
+        if (t->type == 'T') { // Transfer
             strcpy(t->dest_account, cmd.command_list[3]);
             t->amount = atof(cmd.command_list[4]);
-        } else if (t->type == 'D' || t->type == 'W') { // deposit or withdraw
+        } else if (t->type == 'D' || t->type == 'W') { // Deposit or withdraw
             t->amount = atof(cmd.command_list[3]);
         }
 
         num_transactions++;
-        
         free_command_line(&cmd);
     }
-    
     fclose(file);
 }
 
+// Worker thread function
 void* thread_process_transactions(void* arg) {
-    pthread_barrier_wait(&start_barrier); // Wait until all threads are ready
-    
     int thread_id = *(int*)arg;
+    printf("Thread %d waiting at the barrier.\n", thread_id);
+    pthread_barrier_wait(&start_barrier); // Wait until all threads are ready
+    printf("Thread %d passed the barrier.\n", thread_id);
 
-    // divide transactions among threads
-    int transactions_per_thread = num_transactions / num_threads;
+    int transactions_per_thread = (num_transactions + num_threads - 1) / num_threads; // Round up
     int start = thread_id * transactions_per_thread;
-    int end;
-    if (thread_id == num_threads - 1) {
-        end = num_transactions; // last thread processes all remaining transactions
-    } else {
-        end = start + transactions_per_thread; // first 9 split
-    }
+    int end = (start + transactions_per_thread > num_transactions) ? num_transactions : start + transactions_per_thread;
     printf("Thread %d processing transactions from %d to %d\n", thread_id, start, end);
 
-    int found_account = 0; 
     for (int i = start; i < end; i++) {
         transaction *t = &transactions[i];
-        found_account = 0; 
+
         for (int j = 0; j < num_accounts; j++) {
             account *acc = &accounts[j];
 
             if (strcmp(acc->account_number, t->src_account) == 0) {
-                found_account = 1;
                 if (strcmp(acc->password, t->password) != 0) {
-                    //printf("Invalid password for account %s\n", acc->account_number);
-                    break; }
+                    printf("Invalid password for account %s\n", acc->account_number);
+                    break;
+                }
 
                 pthread_mutex_lock(&acc->ac_lock); // Lock the account before modifying it
                 if (t->type == 'D') {
@@ -225,67 +216,56 @@ void* thread_process_transactions(void* arg) {
                             accounts[k].balance += t->amount;
                             pthread_mutex_unlock(&accounts[k].ac_lock);
                             break;
-                        }}}
+                        }
+                    }
+                }
                 pthread_mutex_unlock(&acc->ac_lock); // Unlock the account
 
-                // check if transactions threshold is reached
+                // Check if transaction threshold is reached
                 pthread_mutex_lock(&threshold_mutex);
                 processed_transactions++;
-                if (processed_transactions % TRANSACTION_THRESHOLD == 0 ||
-                    processed_transactions >= num_transactions) {
+                printf("Thread %d: Processed transaction %d/%d\n", thread_id, processed_transactions, num_transactions);
+                if (processed_transactions % TRANSACTION_THRESHOLD == 0 || processed_transactions == num_transactions) {
                     bank_ready = 1;
-                    pthread_cond_signal(&threshold_cond); // notify bank thread
-                    printf("Thread %d: Notified bank thread for processing.\n", thread_id);
+                    pthread_cond_signal(&threshold_cond);
+                    printf("Thread %d: Notified bank thread.\n", thread_id);
                 }
                 pthread_mutex_unlock(&threshold_mutex);
+
                 break;
-    }   
-    if (found_account == 0) {
-        //printf("src acc %s not found\n", t->src_account);
+            }
+        }
     }
-    }}
+
+    pthread_mutex_lock(&threshold_mutex);
+    if (processed_transactions >= num_transactions) {
+        bank_ready = 1;
+        pthread_cond_signal(&threshold_cond);
+    }
+    pthread_mutex_unlock(&threshold_mutex);
 
     return NULL;
 }
 
-// write final balances to output file
-void write_output(const char *filename) {
-    FILE *file = fopen(filename, "w");
-    if (!file) { // error check for opening output file
-        perror("Failed to open output file");
-        exit(1);
-    }
-
-    for (int i = 0; i < num_accounts; i++) {
-        // write the index and balance in the required format
-        fprintf(file, "%d balance: \t%.2f\n", i, accounts[i].balance);
-    }
-
-    fclose(file); // close output file 
-}
-
+// Bank thread function
 void* update_balance(void* arg) {
     int total_updates = 0;
+
     while (1) {
         pthread_mutex_lock(&threshold_mutex);
         while (!bank_ready) {
             if (processed_transactions >= num_transactions) {
                 pthread_mutex_unlock(&threshold_mutex);
-                printf("Bank thread: All transactions processed. Exiting.\n");
+                printf("Bank thread: All transactions processed. Exiting after %d updates.\n", total_updates);
                 return NULL; // Exit the thread
             }
             pthread_cond_wait(&threshold_cond, &threshold_mutex);
         }
-        /*
-        if (processed_transactions >= num_transactions) {
-            pthread_mutex_unlock(&threshold_mutex);
-            break;
-        }*/
-        bank_ready = 0;
-        printf("Bank thread: Processing update.\n");
+        bank_ready = 0; // Reset the flag
+        printf("Bank thread: Processing transactions. Processed: %d/%d\n", processed_transactions, num_transactions);
         pthread_mutex_unlock(&threshold_mutex);
 
-        // Update account balances
+        // Update balances
         for (int i = 0; i < num_accounts; i++) {
             pthread_mutex_lock(&accounts[i].ac_lock);
             accounts[i].balance += accounts[i].transaction_tracter * accounts[i].reward_rate;
@@ -302,18 +282,22 @@ void* update_balance(void* arg) {
             }
         }
         total_updates++;
-        
-        // Exit condition (if all transactions are processed)
-        pthread_mutex_lock(&threshold_mutex);
-        printf("Processed transactions: %d, Total transactions: %d\n", processed_transactions, num_transactions);
-        if (processed_transactions >= num_transactions) {
-            pthread_mutex_unlock(&threshold_mutex);
-            printf("Bank thread: All transactions processed. Exiting.\n");
-            break;
-        }
-        pthread_mutex_unlock(&threshold_mutex); 
-        printf("Bank thread completed, total updates : %d\n", total_updates);
+        printf("Bank thread: Completed update %d\n", total_updates);
     }
-    
+}
 
+// Write final balances to output file
+void write_output(const char *filename) {
+    FILE *file = fopen(filename, "w");
+    if (!file) { // Error check for opening output file
+        perror("Failed to open output file");
+        exit(1);
+    }
+
+    for (int i = 0; i < num_accounts; i++) {
+        // Write the index and balance in the required format
+        fprintf(file, "%d balance: \t%.2f\n", i, accounts[i].balance);
+    }
+
+    fclose(file); // Close output file 
 }
