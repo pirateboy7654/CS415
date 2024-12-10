@@ -201,7 +201,7 @@ void* thread_process_transactions(void* arg) {
             if (strcmp(acc->account_number, t->src_account) == 0) {
                 found_account = 1;
                 if (strcmp(acc->password, t->password) != 0) {
-                    printf("Invalid password for account %s\n", acc->account_number);
+                    //printf("Invalid password for account %s\n", acc->account_number);
                     break; }
 
                 pthread_mutex_lock(&acc->ac_lock); // Lock the account before modifying it
