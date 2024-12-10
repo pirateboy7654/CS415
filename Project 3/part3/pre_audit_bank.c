@@ -307,8 +307,8 @@ void* update_balance(void* arg) {
             printf("Bank thread: All transactions processed. Exiting.\n");
             break;
         }
-        pthread_mutex_unlock(&threshold_mutex); 
-    }*/
+        pthread_mutex_unlock(&threshold_mutex); */
+    }
     printf("Bank thread completed, total updates : %d\n", total_updates);
     return NULL;
 }
