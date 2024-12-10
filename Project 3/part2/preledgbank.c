@@ -254,6 +254,7 @@ void* thread_process_transactions(void* arg) {
                         snprintf(log_entry, sizeof(log_entry),
                                 "Worker checked balance of Account %s. Balance is %.2f. Check ocurred at %s",
                                 acc->account_number, acc->balance, ctime(&now)); // 
+                        log_entry[sizeof(log_entry) - 1] = '\0'; // null terminate
                         if (write(pipe_fd[1], log_entry, strlen(log_entry) + 1) == -1) {
                             perror("Write to pipe failed");
                         }
@@ -305,6 +306,7 @@ void* update_balance(void* arg) {
                  "Applied Interest to Account %s. New Balance is %.2f. Time of Update: %s", 
                  accounts[i].account_number, accounts[i].balance, ctime(&now));
         //write(pipe_fd[1], message, strlen(message));
+        message[sizeof(message)-1] = '\0'; // null terminate
         if (write(pipe_fd[1], message, strlen(message)) == -1) {
             perror("Write to pipe failed");
         }
