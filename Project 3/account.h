@@ -7,7 +7,7 @@ typedef struct
 	char password[9];
     double balance;
     double reward_rate;
-    
+    double savings_balance;
     double transaction_tracter;
 
     char out_file[64];

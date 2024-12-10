@@ -13,6 +13,7 @@ void read_input(const char *filename);
 void* thread_process_transactions(void* arg);
 void write_output(const char *filename);
 void* update_balance(void* arg);
+void* update_savings(void* arg);
 void initialize_shared_memory();
 void finalize_shared_memory();
 
@@ -50,7 +51,7 @@ int main(int argc, char *argv[]) {
     }
 
     pthread_t threads[num_threads];
-    pthread_t bank_thread;
+    pthread_t bank_thread, savings_thread;
     int thread_ids[num_threads];
 
     // Initialize synchronization variables
@@ -73,6 +74,9 @@ int main(int argc, char *argv[]) {
     // Create bank thread
     pthread_create(&bank_thread, NULL, update_balance, NULL);
 
+    // Create savings thread
+    pthread_create(&savings_thread, NULL, update_savings, NULL);
+
     // Wait for all threads to be ready
     printf("Main thread reached the barrier.\n");
     pthread_barrier_wait(&start_barrier);
@@ -92,7 +96,9 @@ int main(int argc, char *argv[]) {
     }
     pthread_mutex_unlock(&threshold_mutex);
 
+    // Join banker and savings threads
     pthread_join(bank_thread, NULL);
+    pthread_join(savings_thread, NULL);
 
     write_output("output.txt");
 
@@ -160,6 +166,8 @@ void read_input(const char *filename) {
 
         // Initialize other fields
         accounts[i].transaction_tracter = 0.0;
+        accounts[i].savings_balance = accounts[i].balance * 0.2; // 20% initial savings
+        accounts[i].savings_reward_rate = 0.02; // Fixed savings reward rate
         char temp_out_file[64];
         snprintf(temp_out_file, sizeof(temp_out_file),"account_%s.txt", accounts[i].account_number);
         strncpy(accounts[i].out_file, temp_out_file, sizeof(accounts[i].out_file) - 1);
@@ -267,8 +275,6 @@ void* thread_process_transactions(void* arg) {
 
     return NULL;
 }
-
-// Bank thread function
 void* update_balance(void* arg) {
     int total_updates = 0;
 
@@ -307,6 +313,32 @@ void* update_balance(void* arg) {
     }
 }
 
+// Savings thread function
+void* update_savings(void* arg) {
+    while (1) {
+        pthread_mutex_lock(&threshold_mutex);
+        while (!bank_ready) {
+            if (processed_transactions >= num_transactions) {
+                printf("Savings thread: All transactions processed. Exiting.\n");
+                pthread_mutex_unlock(&threshold_mutex);
+                return NULL; // Exit thread
+            }
+            pthread_cond_wait(&threshold_cond, &threshold_mutex);
+        }
+        bank_ready = 0;
+        pthread_mutex_unlock(&threshold_mutex);
+
+        // Apply interest to savings accounts
+        for (int i = 0; i < num_accounts; i++) {
+            pthread_mutex_lock(&accounts[i].ac_lock);
+            accounts[i].savings_balance += accounts[i].savings_balance * accounts[i].savings_reward_rate;
+            pthread_mutex_unlock(&accounts[i].ac_lock);
+        }
+
+        printf("Savings thread: Interest applied to savings accounts.\n");
+    }
+}
+
 // Write final balances to output file
 void write_output(const char *filename) {
     FILE *file = fopen(filename, "w");
@@ -317,7 +349,7 @@ void write_output(const char *filename) {
 
     for (int i = 0; i < num_accounts; i++) {
         // Write the index and balance in the required format
-        fprintf(file, "%d balance: \t%.2f\n", i, accounts[i].balance);
+        fprintf(file, "%d balance: \t%.2f\nSavings balance: \t%.2f\n", i, accounts[i].balance, accounts[i].savings_balance);
     }
 
     fclose(file); // Close output file 
