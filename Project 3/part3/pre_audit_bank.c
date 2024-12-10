@@ -73,9 +73,9 @@ int main(int argc, char *argv[]) {
     // Notify bank thread to finalize
     pthread_mutex_lock(&threshold_mutex);
     if (processed_transactions < num_transactions) {
+        printf("Main thread: Final notification sent to bank thread.\n");
         bank_ready = 1;
         pthread_cond_signal(&threshold_cond);
-        printf("Main thread: Final notification sent to bank thread.\n");
     }
     pthread_mutex_unlock(&threshold_mutex);
 
@@ -183,7 +183,7 @@ void* thread_process_transactions(void* arg) {
     int transactions_per_thread = (num_transactions + num_threads - 1) / num_threads; // Round up
     int start = thread_id * transactions_per_thread;
     int end = (start + transactions_per_thread > num_transactions) ? num_transactions : start + transactions_per_thread;
-    printf("Thread %d processing transactions from %d to %d\n", thread_id, start, end);
+    printf("Thread %d assigned range: %d to %d\n", thread_id, start, end);
 
     for (int i = start; i < end; i++) {
         transaction *t = &transactions[i];
@@ -260,7 +260,7 @@ void* update_balance(void* arg) {
             }
             pthread_cond_wait(&threshold_cond, &threshold_mutex);
         }
-        bank_ready = 0; // Reset the flag
+        bank_ready = 0; // Reset the flag for the next round
         printf("Bank thread: Processing transactions. Processed: %d/%d\n", processed_transactions, num_transactions);
         pthread_mutex_unlock(&threshold_mutex);
 
