@@ -199,7 +199,7 @@ void* thread_process_transactions(void* arg) {
                     printf("Invalid password for account %s\n", acc->account_number);
                     break; }
 
-                pthread_mutex_lock(&acc->ac_lock); // Lock the account before modifying it
+                pthread_mutex_lock(&acc->ac_lock); // lock the account before modifying it
                 if (t->type == 'D') {
                     acc->balance += t->amount;
                     acc->transaction_tracter += t->amount;
@@ -215,11 +215,11 @@ void* thread_process_transactions(void* arg) {
 
                     if (check_balance_count % 500 == 0) {
                         char message[256];
-                        time_t now = time(NULL); // Get the current time
+                        time_t now = time(NULL); // get the current time
                         snprintf(message, sizeof(message), 
                                 "Worker checked balance of Account %s. Balance is $%.2f. Check ocurred at %s\n",
                                 t->src_account, accounts[i].balance, ctime(&now));
-                        write(pipe_fd[1], message, strlen(message)); // Write to pipe
+                        write(pipe_fd[1], message, strlen(message)); // write to pipe
                     }
                     break;
                 }
@@ -227,7 +227,7 @@ void* thread_process_transactions(void* arg) {
                     acc->balance -= t->amount;
                     acc->transaction_tracter += t->amount;
 
-                    // Update the destination account
+                    // update the destination account
                     for (int k = 0; k < num_accounts; k++) {
                         if (strcmp(accounts[k].account_number, t->dest_account) == 0) {
                             pthread_mutex_lock(&accounts[k].ac_lock);
@@ -235,7 +235,7 @@ void* thread_process_transactions(void* arg) {
                             pthread_mutex_unlock(&accounts[k].ac_lock);
                             break;
                         }}}
-                pthread_mutex_unlock(&acc->ac_lock); // Unlock the account
+                pthread_mutex_unlock(&acc->ac_lock); // unlock the account
                 break;
     }   
     if (found_account == 0) {
@@ -296,8 +296,8 @@ void run_auditor(int read_fd) {
     while (1) {
         ssize_t bytes_read = read(read_fd, buffer, sizeof(buffer) - 1);
         if (bytes_read > 0) {
-            buffer[bytes_read] = '\0'; // Null-terminate the string
-            fprintf(ledger, "%s", buffer); // Write to ledger.txt
+            buffer[bytes_read] = '\0'; // null-terminate the string
+            fprintf(ledger, "%s", buffer); // write to ledger.txt
             lines_written++;
         } else if (bytes_read == 0) { // end of file
             printf("Auditor received EOF. Exiting...\n");
