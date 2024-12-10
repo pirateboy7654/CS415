@@ -281,6 +281,7 @@ void* update_balance(void* arg) {
         // Write individual account updates to files
         for (int i = 0; i < num_accounts; i++) {
             FILE *file = fopen(accounts[i].out_file, "a");
+            fprintf(file, "account %d:\n", i);
             if (file) {
                 fprintf(file, "Current Balance: \t%.2f\n", accounts[i].balance);
                 fclose(file);
