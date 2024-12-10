@@ -61,9 +61,9 @@ int main(int argc, char *argv[]) {
     pthread_create(&bank_thread, NULL, update_balance, NULL);
 
     // Wait for all threads to be ready
-    printf("Main thread reached the barrier.\n");
+    //printf("Main thread reached the barrier.\n");
     pthread_barrier_wait(&start_barrier);
-    printf("Main thread passed the barrier.\n");
+    //printf("Main thread passed the barrier.\n");
 
     // Join worker threads
     for (int i = 0; i < num_threads; i++) {
@@ -176,14 +176,14 @@ void read_input(const char *filename) {
 // Worker thread function
 void* thread_process_transactions(void* arg) {
     int thread_id = *(int*)arg;
-    printf("Thread %d waiting at the barrier.\n", thread_id);
+    //printf("Thread %d waiting at the barrier.\n", thread_id);
     pthread_barrier_wait(&start_barrier); // Wait until all threads are ready
-    printf("Thread %d passed the barrier.\n", thread_id);
+    //printf("Thread %d passed the barrier.\n", thread_id);
 
     int transactions_per_thread = (num_transactions + num_threads - 1) / num_threads; // Round up
     int start = thread_id * transactions_per_thread;
     int end = (start + transactions_per_thread > num_transactions) ? num_transactions : start + transactions_per_thread;
-    printf("Thread %d assigned range: %d to %d\n", thread_id, start, end);
+    //printf("Thread %d assigned range: %d to %d\n", thread_id, start, end);
 
     for (int i = start; i < end; i++) {
         transaction *t = &transactions[i];
@@ -193,7 +193,7 @@ void* thread_process_transactions(void* arg) {
 
             if (strcmp(acc->account_number, t->src_account) == 0) {
                 if (strcmp(acc->password, t->password) != 0) {
-                    printf("Invalid password for account %s. Skipping transaction.\n", acc->account_number);
+                    //printf("Invalid password for account %s. Skipping transaction.\n", acc->account_number);
                     pthread_mutex_lock(&threshold_mutex);
                     processed_transactions++; // Increment for skipped transactions
                     pthread_mutex_unlock(&threshold_mutex);
@@ -226,11 +226,11 @@ void* thread_process_transactions(void* arg) {
                 // Check if transaction threshold is reached
                 pthread_mutex_lock(&threshold_mutex);
                 processed_transactions++;
-                printf("Thread %d: Processed transaction %d/%d\n", thread_id, processed_transactions, num_transactions);
+                //("Thread %d: Processed transaction %d/%d\n", thread_id, processed_transactions, num_transactions);
                 if (processed_transactions % TRANSACTION_THRESHOLD == 0 || processed_transactions == num_transactions) {
                     bank_ready = 1;
                     pthread_cond_signal(&threshold_cond);
-                    printf("Thread %d: Notified bank thread.\n", thread_id);
+                    //printf("Thread %d: Notified bank thread.\n", thread_id);
                 }
                 pthread_mutex_unlock(&threshold_mutex);
 
@@ -243,9 +243,9 @@ void* thread_process_transactions(void* arg) {
     if (processed_transactions >= num_transactions) {
         bank_ready = 1;
         pthread_cond_signal(&threshold_cond);
-        printf("Thread %d: All transactions processed. Final notification sent.\n", thread_id);
+        //printf("Thread %d: All transactions processed. Final notification sent.\n", thread_id);
     } else {
-        printf("Thread %d: Remaining transactions to process: %d.\n", thread_id, num_transactions - processed_transactions);
+        //printf("Thread %d: Remaining transactions to process: %d.\n", thread_id, num_transactions - processed_transactions);
     }
     pthread_mutex_unlock(&threshold_mutex);
 
@@ -260,14 +260,14 @@ void* update_balance(void* arg) {
         pthread_mutex_lock(&threshold_mutex);
         while (!bank_ready) {
             if (processed_transactions >= num_transactions) {
-                printf("Bank thread: All transactions processed (%d/%d). Exiting.\n", processed_transactions, num_transactions);
+                //printf("Bank thread: All transactions processed (%d/%d). Exiting.\n", processed_transactions, num_transactions);
                 pthread_mutex_unlock(&threshold_mutex);
                 return NULL; // Exit the thread
             }
             pthread_cond_wait(&threshold_cond, &threshold_mutex);
         }
         bank_ready = 0; // Reset the flag for the next round
-        printf("Bank thread: Processing transactions. Processed: %d/%d\n", processed_transactions, num_transactions);
+        //printf("Bank thread: Processing transactions. Processed: %d/%d\n", processed_transactions, num_transactions);
         pthread_mutex_unlock(&threshold_mutex);
 
         // Update balances
@@ -288,7 +288,7 @@ void* update_balance(void* arg) {
             }
         }
         total_updates++;
-        printf("Bank thread: Completed update %d\n", total_updates);
+        //printf("Bank thread: Completed update %d\n", total_updates);
     }
 }
 
