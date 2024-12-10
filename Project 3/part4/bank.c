@@ -7,6 +7,8 @@
 #include <unistd.h>
 #include "../account.h"
 #include "../string_parser.h"
+#include <sys/stat.h>
+#include <sys/types.h>
 
 // Function declarations
 void read_input(const char *filename);
@@ -339,22 +341,28 @@ void* update_savings(void* arg) {
     }
 }
 
-// Write final balances to output file
 void write_output(const char *filename) {
-    FILE *file = fopen(filename, "w");
-    if (!file) { // Error check for opening output file
-        perror("Failed to open output file");
-        exit(1);
-    }
-
     for (int i = 0; i < num_accounts; i++) {
-        // Write the index and balance in the required format
-        fprintf(file, "%d balance: \t%.2f\nSavings balance: \t%.2f\n", i, accounts[i].balance, accounts[i].savings_balance);
+        // Create a directory for the account
+        char dir_path[128];
+        snprintf(dir_path, sizeof(dir_path), "output/%s", accounts[i].account_number);
+        mkdir(dir_path, 0777); // Create directory with full permissions
+
+        // Create the output file path
+        char file_path[256];
+        snprintf(file_path, sizeof(file_path), "%s/%s", dir_path, filename);
+
+        // Write the account balance to the output file
+        FILE *file = fopen(file_path, "w");
+        if (!file) { // Error check for opening output file
+            perror("Failed to open output file");
+            exit(1);
+        }
+
+        fprintf(file, "Balance: \t%.2f\nSavings Balance: \t%.2f\n", accounts[i].balance, accounts[i].savings_balance);
+        fclose(file); // Close output file
     }
-
-    fclose(file); // Close output file 
 }
-
 // Initialize shared memory
 void initialize_shared_memory() {
     shm_fd = shm_open("/duckbank_shared", O_CREAT | O_RDWR, 0666);
