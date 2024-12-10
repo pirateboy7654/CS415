@@ -352,7 +352,7 @@ void* update_savings(void* arg) {
 
             FILE *file = fopen(file_path, "a");
             if (file) {
-                fprintf(file, "Savings Balance: \t%.2f\n", accounts[i].savings_balance);
+                fprintf(file, "Current Savings Balance \t%.2f\n", accounts[i].savings_balance);
                 fclose(file);
             }
         }
@@ -374,7 +374,7 @@ void write_output(const char *filename) {
     }
 
     for (int i = 0; i < num_accounts; i++) {
-        fprintf(file, "Account %d: Final Balance: %.2f\n", i + 1, accounts[i].balance);
+        fprintf(file, "%d balance: \t%.2f\n", i + 1, accounts[i].balance);
     }
     fclose(file);
 
