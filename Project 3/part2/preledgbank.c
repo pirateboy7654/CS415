@@ -63,6 +63,7 @@ int main(int argc, char *argv[]) {
     // Parent process: Duck Bank
     close(pipe_fd[0]); // Close unused read end
     read_input(argv[1]);
+    printf("after read input num trans : %d\n", num_transactions);
 
     // create all threads
     printf("creating threads\n");
@@ -100,13 +101,14 @@ int main(int argc, char *argv[]) {
 
 // read accs and transactions from input file
 void read_input(const char *filename) {
+    printf("Attempting to open file: %s\n", filename);
     FILE *file = fopen(filename, "r");
     if (!file) { // file open error check
         perror("Failed to open input file");
         exit(1);
     }
 
-    char buffer[1024];
+    char buffer[10024];
     const char *delim = " "; // delim for transactions
 
     // read number of accounts (first line)
@@ -147,7 +149,7 @@ void read_input(const char *filename) {
 
         // init other fields
         accounts[i].transaction_tracter = 0.0;
-        char temp_out_file[64];
+        char temp_out_file[10024];
         snprintf(temp_out_file, sizeof(temp_out_file),"account_%s.txt", accounts[i].account_number);
         strncpy(accounts[i].out_file, temp_out_file, sizeof(accounts[i].out_file) - 1);
         accounts[i].out_file[sizeof(accounts[i].out_file) - 1] = '\0'; // null terminate
@@ -174,13 +176,14 @@ void read_input(const char *filename) {
         num_transactions++;
         free_command_line(&cmd);
     }
+    printf("num_transactions : %d\n", num_transactions);    
     fclose(file);
 }
 
 void* thread_process_transactions(void* arg) {
 
     int thread_id = *(int*)arg;
-
+    printf("Thread %d started.\n", thread_id);
     // divide transactions among threads
     int transactions_per_thread = num_transactions / num_threads;
     int start = thread_id * transactions_per_thread;
@@ -208,6 +211,10 @@ void* thread_process_transactions(void* arg) {
                 // Successful transaction processing
                 
                 pthread_mutex_lock(&acc->ac_lock); // Lock the account before modifying it
+                
+
+                printf("Thread %d locked account %s\n", thread_id, acc->account_number);
+
                 if (t->type == 'D') {
                     acc->balance += t->amount;
                     acc->transaction_tracter += t->amount;
@@ -215,22 +222,34 @@ void* thread_process_transactions(void* arg) {
                     acc->balance -= t->amount;
                     acc->transaction_tracter += t->amount;
                 } else if (t->type == 'T') {
-                    acc->balance -= t->amount;
-                    acc->transaction_tracter += t->amount;
+                    
 
                     // Update the destination account
                     for (int k = 0; k < num_accounts; k++) {
                         if (strcmp(accounts[k].account_number, t->dest_account) == 0) {
-                            pthread_mutex_lock(&accounts[k].ac_lock);
+                            //pthread_mutex_lock(&accounts[k].ac_lock);
+                            if (strcmp(acc->account_number, accounts[k].account_number) < 0) {
+                                pthread_mutex_lock(&acc->ac_lock);        // Lock the smaller account first
+                                pthread_mutex_lock(&accounts[k].ac_lock); // Lock the larger account second
+                            } else {
+                                pthread_mutex_lock(&accounts[k].ac_lock); // Lock the smaller account first
+                                pthread_mutex_lock(&acc->ac_lock);        // Lock the larger account second
+                            }
+                            printf("Thread %d locked account %s\n", thread_id, acc->account_number);
+                            acc->balance -= t->amount;
+                            acc->transaction_tracter += t->amount;
                             accounts[k].balance += t->amount;
                             pthread_mutex_unlock(&accounts[k].ac_lock);
+                            pthread_mutex_unlock(&acc->ac_lock);
+
+                            printf("Thread %d unlocked account %s\n", thread_id, acc->account_number);
                             break;
                         }}
                 } else if (t->type == 'C') {
                     pthread_mutex_lock(&transaction_counter_lock);
                     transaction_counter++;
                     if (transaction_counter % 500 == 0) {
-                        char log_entry[1024];
+                        char log_entry[10024];
                         time_t now = time(NULL);
                         snprintf(log_entry, sizeof(log_entry),
                                 "Worker checked balance of Account %s. Balance is %.2f. Check ocurred at %s",
@@ -240,9 +259,12 @@ void* thread_process_transactions(void* arg) {
                         }
                     }
                     pthread_mutex_unlock(&transaction_counter_lock);
+                    printf("Thread %d unlocked trans counter %s\n", thread_id, acc->account_number);
+
                 }
-                    
                 pthread_mutex_unlock(&acc->ac_lock); // Unlock the account
+                printf("Thread %d unlocked account %s\n", thread_id, acc->account_number);
+
                 break;
     }   
     /*if (found_account == 0) {
@@ -277,7 +299,7 @@ void* update_balance(void* arg) {
         //printf("balance for account %d : %.2f\n", i, accounts[i].balance); // debug
         accounts[i].transaction_tracter = 0.0; // reset tracker after updating
 
-        char message[1024];
+        char message[10024];
         time_t now = time(NULL);
         snprintf(message, sizeof(message), 
                  "Applied Interest to Account %s. New Balance is %.2f. Time of Update: %s", 
@@ -299,7 +321,7 @@ void auditor_process(int read_fd) {
         exit(1);
     }
 
-    char buffer[1024];
+    char buffer[10024];
     ssize_t bytes_read;
     while ((bytes_read = read(read_fd, buffer, sizeof(buffer))) > 0) {
         buffer[bytes_read] = '\0'; // null-terminate the string
