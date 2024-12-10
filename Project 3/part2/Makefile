@@ -3,7 +3,7 @@ CFLAGS = -pthread -g -lpthread
 
 TARGET = bank
 
-SRCS = preledgbank.c ../string_parser.c
+SRCS = pre_audit_bank.c ../string_parser.c
 
 all:
 	$(CC) $(CFLAGS) -o $(TARGET) $(SRCS)
@@ -11,4 +11,3 @@ all:
 clean:
 	rm -f $(TARGET)
 	rm output.txt
-	rm ledger.txt
