@@ -266,8 +266,12 @@ void* update_balance(void* arg) {
     int total_updates = 0;
     while (1) {
         pthread_mutex_lock(&threshold_mutex);
-        while (!bank_ready && processed_transactions < num_transactions) { 
-            pthread_cond_wait(&threshold_cond, &threshold_mutex); // Wait for signal
+        while (!bank_ready) {
+            if (processed_transactions >= num_transactions) {
+                pthread_mutex_unlock(&threshold_mutex);
+                return NULL; // Exit the thread
+            }
+            pthread_cond_wait(&threshold_cond, &threshold_mutex);
         }
 
         if (processed_transactions >= num_transactions) {
@@ -294,7 +298,7 @@ void* update_balance(void* arg) {
             }
         }
         total_updates++;
-        
+        /*
         // Exit condition (if all transactions are processed)
         pthread_mutex_lock(&threshold_mutex);
         printf("Processed transactions: %d, Total transactions: %d\n", processed_transactions, num_transactions);
@@ -304,7 +308,7 @@ void* update_balance(void* arg) {
             break;
         }
         pthread_mutex_unlock(&threshold_mutex); 
-    }
+    }*/
     printf("Bank thread completed, total updates : %d\n", total_updates);
     return NULL;
 }
