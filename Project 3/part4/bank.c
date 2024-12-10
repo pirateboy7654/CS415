@@ -324,6 +324,8 @@ void* update_balance(void* arg) {
 
 // Savings thread function
 void* update_savings(void* arg) {
+    mkdir("savings", 0777); // Ensure savings directory exists
+
     while (1) {
         pthread_mutex_lock(&threshold_mutex);
         while (!bank_ready) {
@@ -360,6 +362,9 @@ void* update_savings(void* arg) {
 }
 // Write final balances to output file
 void write_output(const char *filename) {
+    mkdir("output", 0777); // Ensure output directory exists
+
+    // Write final balances to output.txt
     FILE *file = fopen(filename, "w");
     if (!file) {
         perror("Failed to open output file");
@@ -372,8 +377,9 @@ void write_output(const char *filename) {
     fclose(file);
 
     // Write final savings balances to savings_output.txt
+    mkdir("savings", 0777); // Ensure savings directory exists
     char savings_file[64];
-    snprintf(savings_file, sizeof(savings_file), "savings_output.txt");
+    snprintf(savings_file, sizeof(savings_file), "savings/savings_output.txt");
     FILE *savings_output = fopen(savings_file, "w");
     if (!savings_output) {
         perror("Failed to open savings output file");
@@ -385,6 +391,8 @@ void write_output(const char *filename) {
     }
     fclose(savings_output);
 }
+
+
 // Initialize shared memory
 void initialize_shared_memory() {
     shm_fd = shm_open("/duckbank_shared", O_CREAT | O_RDWR, 0666);
