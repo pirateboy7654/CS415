@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
     // Wait for all threads to be ready
     for (int i = 0; i < num_threads; i++)
     {
-        printf("thread %d reach wait barrier\n", thread_ids);
+        printf("thread %d reach wait barrier\n", thread_ids[i]);
     }
     pthread_barrier_wait(&start_barrier);
 
